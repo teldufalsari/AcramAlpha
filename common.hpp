@@ -70,6 +70,8 @@ size_t Extract(const std::string& where_from, std::string& where_to, size_t pos,
 size_t FindFirstOfSet(const std::string& where_from, size_t pos, const char* delim);
 bool ChrCmp(const char chrs, const char* strs);
 std::string OpToStr(int op);
+bool IsCommutative(int op);
+int Priority(const expr_node& node);
 
 inline std::size_t SkipSpaces(const std::string& str, size_t pos)
 {

@@ -150,3 +150,39 @@ std::string OpToStr(int op)
         return "nil";
     }
 }
+
+bool IsCommutative(int op)
+{
+    return ((op == DIV) || (op == SUB) || (op == PWR) ? false : true);
+}
+
+int Priority(const expr_node& node)
+{
+    if (node.type == OP) {
+    switch (node.value.integer) {
+        case COS:
+        case SIN:
+        case TAN:
+        case COT:
+        case EXP:
+        case LOG:
+            return 1;
+        
+        case PWR:
+            return 3;
+        
+        case MUL:
+        case DIV:
+            return 4;
+        
+        case ADD:
+        case SUB:
+            return 5;
+        
+        default:
+            return -1;
+        }
+    } else {
+        return 2;
+    }
+}

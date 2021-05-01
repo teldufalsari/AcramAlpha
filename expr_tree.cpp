@@ -13,14 +13,17 @@ expr_tree::expr_tree(expr_node* _root, const tld::vector<std::string>& _paramete
 
 std::string expr_tree::toStr(expr_node* node)
 {
-    std::string output = "(";
+    std::string output;
+    if (node->parent != nullptr && Priority(*(node->parent)) <= Priority(*node))
+        output += "(";
     if (node->left != nullptr)
         output += toStr(node->left);
     output += valueToStr(*node);
     if (node->right != nullptr)
         output += toStr(node->right);
+    if (node->parent != nullptr && Priority(*(node->parent)) <= Priority(*node))
         output += ")";
-    return output;
+        return output;
 }
 
 std::string expr_tree::toStr()
