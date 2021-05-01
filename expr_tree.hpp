@@ -15,11 +15,16 @@ public:
     ~expr_tree();
 
     std::string toStr();
+    std::string toTex();
 
 private:
-    std::string toStr(expr_node* node);
+    std::string toStr(const expr_node* node);
+    std::string toTex(const expr_node* node);
     std::string valueToStr(const expr_node& node);
+    std::string texify(const expr_node& node);
 };
 
+std::string OpToTex(int op);
+std::string ParToTex(const std::string& par);
 
 #endif // ACRAM_EXPR_TREE_H
