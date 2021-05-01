@@ -99,7 +99,7 @@ expr_node* expr_parser::getPrimary()
 {
     expr_node* root = nullptr;
     if (str_[pos_] == '(') {
-        pos_ = SkipSpaces(str_, pos_);
+        pos_ = SkipSpaces(str_, pos_ + 1);
         root = getExpr();
         Link(root, root->left, root->right);
         if (str_[pos_] != ')')
@@ -165,14 +165,16 @@ expr_node* expr_parser::getWord()
         word += str_[pos_++];
     int f_code = findFunction(word);
     if (f_code != NONE) {
+        root = new expr_node(OP, (long)f_code);
+        pos_ = SkipSpaces(str_, pos_);
         if (str_[pos_] == '(') {
-            pos_ = SkipSpaces(str_, pos_);
+            pos_ = SkipSpaces(str_, pos_ + 1);
             root->right = getExpr();
             Link(root, nullptr, root->right);
             if (str_[pos_] != ')')
                 raise(ERR_CLOSING_PAR);
             else
-                pos_ = SkipSpaces(str_, pos_);
+                pos_ = SkipSpaces(str_, pos_ + 1);
         } else {
             raise(ERR_NO_OPERAND);
         }
