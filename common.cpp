@@ -120,3 +120,33 @@ bool ChrCmp(const char chrs, const char* strs)
     }
     return false;
 }
+
+std::string OpToStr(int op)
+{
+    switch (op) {
+    case ADD:
+        return "+";
+    case SUB:
+        return "-";
+    case MUL:
+        return "*";
+    case DIV:
+        return "/";
+    case COS:
+        return "cos";
+    case SIN:
+        return "sin";
+    case TAN:
+        return "tan";
+    case COT:
+        return "cot";
+    case EXP:
+        return "exp";
+    case PWR:
+        return "^";
+    case LOG:
+        return "log";
+    default:
+        return "nil";
+    }
+}

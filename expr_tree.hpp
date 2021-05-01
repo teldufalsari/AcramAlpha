@@ -14,10 +14,11 @@ public:
     expr_tree(expr_node* _root, const tld::vector<std::string>& _parameters, const std::string& _variable);
     ~expr_tree();
 
-    std::string to_str();
+    std::string toStr();
 
 private:
-    std::string to_str(expr_node* node);
+    std::string toStr(expr_node* node);
+    std::string valueToStr(const expr_node& node);
 };
 
 

@@ -11,19 +11,37 @@ expr_tree::expr_tree(expr_node* _root, const tld::vector<std::string>& _paramete
     variable_(_variable)
 {}
 
-std::string expr_tree::to_str(expr_node* node)
+std::string expr_tree::toStr(expr_node* node)
 {
     std::string output = "(";
     if (node->left != nullptr)
-        output += to_str(node->left);
-    output += std::to_string(node->value.integer);
+        output += toStr(node->left);
+    output += valueToStr(*node);
     if (node->right != nullptr)
-        output += to_str(node->right);
+        output += toStr(node->right);
         output += ")";
     return output;
 }
 
-std::string expr_tree::to_str()
+std::string expr_tree::toStr()
 {
-    return to_str(root_);
+    return toStr(root_);
+}
+
+std::string expr_tree::valueToStr(const expr_node& node)
+{
+    switch (node.type) {
+    case INT:
+        return std::to_string(node.value.integer);
+    case FRAC:
+        return std::to_string(node.value.frac);
+    case OP:
+        return OpToStr(node.value.integer);
+    case VAR:
+        return this->variable_;
+    case PAR:
+        return this->parameters_.at(node.value.integer);
+    default:
+        return "nil";
+    }
 }
