@@ -184,6 +184,18 @@ expr_node* expr_tree::derivative(const expr_node* node)
             deriv->right = derivative(node->right);
             Link(deriv, deriv->left, deriv->right);
             break;
+        case TAN:
+            deriv = new expr_node(OP, (long)MUL);
+            deriv->left = tanDeriv(node);
+            deriv->right = derivative(node->right);
+            Link(deriv, deriv->left, deriv->right);
+            break;
+        case COT:
+            deriv = new expr_node(OP, (long)MUL);
+            deriv->left = cotDeriv(node);
+            deriv->right = derivative(node->right);
+            Link(deriv, deriv->left, deriv->right);
+            break;
         default:
             break;
         }
@@ -276,6 +288,31 @@ expr_node* expr_tree::cosDeriv(const expr_node* node)
     deriv->right = new expr_node(OP, (long)SIN);
     deriv->right->right = Copy(node->right);
     Link(deriv->right, nullptr, deriv->right->right);
+    Link(deriv, nullptr, deriv->right);
+    return deriv;
+}
+
+expr_node* expr_tree::tanDeriv(const expr_node* node)
+{
+    auto deriv = new expr_node(OP, (long)DIV);
+    deriv->left = new expr_node(INT, (long)1);
+    deriv->right = new expr_node(OP, (long)PWR);
+    auto square = deriv->right;
+    square->left = new expr_node(OP, (long)COS);
+    square->left->right = Copy(node->right);
+    Link(square->left, nullptr, square->left->right);
+    square->right = new expr_node(INT, (long)2);
+    Link(square, square->left, square->right);
+    Link(deriv, deriv->left, deriv->right);
+    return deriv;
+}
+
+expr_node* expr_tree::cotDeriv(const expr_node* node)
+{
+    auto frac = tanDeriv(node);
+    frac->right->left->value.integer = SIN;
+    auto deriv = new expr_node(OP, (long)SUB);
+    deriv->right = frac;
     Link(deriv, nullptr, deriv->right);
     return deriv;
 }
