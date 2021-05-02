@@ -180,7 +180,9 @@ expr_node* expr_tree::mulDeriv(const expr_node* node)
 {
     expr_node* deriv = new expr_node(OP, (long)ADD);
     deriv->left = new expr_node(OP, (long)MUL, nullptr, derivative(node->left), Copy(node->right));
+    Link(deriv->left, deriv->left->left, deriv->left->right);
     deriv->right = new expr_node(OP, (long)MUL, nullptr, Copy(node->left), derivative(node->right));
+    Link(deriv->right, deriv->right->left, deriv->right->right);
     Link(deriv, deriv->left, deriv->right);
     return deriv;
 }
@@ -196,4 +198,125 @@ expr_node* expr_tree::divDeriv(const expr_node* node)
     Link(deriv->right, deriv->right->left, deriv->right->right);
     Link(deriv, deriv->left, deriv->right);
     return deriv;
+}
+
+void expr_tree::simplify(expr_node* node)
+{
+    if (node->type != OP)
+        return;
+    if (node->left)
+        simplify(node->left);
+    if (node->right)
+        simplify(node->right);
+    switch (node->value.integer) {
+    case ADD:
+        addSimplifs(node);
+        break;
+    case SUB:
+        subSimplifs(node);
+        break;
+    case MUL:
+        mulSimplifs(node);
+        break;
+    case DIV:
+        divSimplifs(node);
+        break;
+    default:
+        break;
+    }
+}
+
+void expr_tree::simplify()
+{
+    simplify(root_);
+}
+
+void expr_tree::mulSimplifs(expr_node* node)
+{
+    
+    if (IsZero(node->left) || IsZero(node->right)) {
+        delete node->left;
+        delete node->right;
+        node->left = node->right = nullptr;
+        node->type = INT;
+        node->value.integer = 0;
+    } else if (IsOne(node->left)) {
+        // connect this node->parent and this node->left subtree
+        if (IsOnLeft(node)) {
+            Link(node->parent, node->right, node->parent->right);
+        } else
+            Link(node->parent, node->parent->left, node->right);
+        // safely remove this node
+        node->right = nullptr;
+        delete node;
+    } else if (IsOne(node->right)) {
+        // connect this node->parent and this node->left subtree
+        if (IsOnLeft(node)) {
+            Link(node->parent, node->left, node->parent->right);
+        } else
+            Link(node->parent, node->parent->left, node->left);
+        // safely remove this node
+        node->left = nullptr;
+        delete node;
+    }
+}
+
+void expr_tree::divSimplifs(expr_node* node)
+{
+    if (IsZero(node->left)) {
+        delete node->left;
+        delete node->right;
+        node->left = node->right = nullptr;
+        node->type = INT;
+        node->value.integer = 0;
+    } else if (IsOne(node->right)) {
+        // connect this node->parent and this node->left subtree
+        if (IsOnLeft(node)) {
+            Link(node->parent, node->left, node->parent->right);
+        } else
+            Link(node->parent, node->parent->left, node->left);
+        // safely remove this node
+        node->left = nullptr;
+        delete node;
+    }
+}
+
+void expr_tree::addSimplifs(expr_node* node)
+{
+    if (IsZero(node->left)) {
+        // connect this node->parent and this node->left subtree
+        if (IsOnLeft(node)) {
+            Link(node->parent, node->right, node->parent->right);
+        } else
+            Link(node->parent, node->parent->left, node->right);
+        // safely remove this node
+        node->right = nullptr;
+        delete node;
+    } else if (IsZero(node->right)) {
+        // connect this node->parent and this node->left subtree
+        if (IsOnLeft(node)) {
+            Link(node->parent, node->left, node->parent->right);
+        } else
+            Link(node->parent, node->parent->left, node->left);
+        // safely remove this node
+        node->left = nullptr;
+        delete node;
+    }
+}
+
+void expr_tree::subSimplifs(expr_node* node)
+{
+    if (IsZero(node->left)) {
+        delete node->left;
+        node->left = nullptr;
+    } else if (IsZero(node->right)) {
+        // connect this node->parent and this node->left subtree
+        if (IsOnLeft(node)) {
+            Link(node->parent, node->left, node->parent->right);
+        } else
+            Link(node->parent, node->parent->left, node->left);
+        // safely remove this node
+        node->left = nullptr;
+        delete node;
+    }
 }

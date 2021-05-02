@@ -74,6 +74,9 @@ std::string OpToStr(int op);
 bool IsCommutative(int op);
 int Priority(const expr_node& node);
 bool NeedParentheses(const expr_node& node);
+bool IsZero(const expr_node* node);
+bool IsOne(const expr_node* node);
+bool IsOnLeft(const expr_node* node);
 
 inline std::size_t SkipSpaces(const std::string& str, size_t pos)
 {

@@ -17,6 +17,7 @@ public:
     std::string toStr();
     std::string toTex();
     expr_tree derivative();
+    void simplify();
 
 private:
     std::string toStr(const expr_node* node);
@@ -26,6 +27,11 @@ private:
     expr_node* derivative(const expr_node* node);
     expr_node* mulDeriv(const expr_node* node);
     expr_node* divDeriv(const expr_node* node);
+    void simplify(expr_node* node);
+    void mulSimplifs(expr_node* node);
+    void divSimplifs(expr_node* node);
+    void addSimplifs(expr_node* node);
+    void subSimplifs(expr_node* node);
 
 };
 

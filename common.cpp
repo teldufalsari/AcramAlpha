@@ -221,3 +221,29 @@ bool NeedParentheses(const expr_node& node)
         return false;
     }
 }
+
+bool IsZero(const expr_node* node)
+{
+    if (node->type == INT && node->value.integer == 0)
+        return true;
+    else
+        return false;
+}
+
+bool IsOne(const expr_node* node)
+{
+    if (node->type == INT && node->value.integer == 1)
+        return true;
+    else
+        return false;
+}
+
+bool IsOnLeft(const expr_node* node)
+{
+    if (node->parent == nullptr)
+        return false;
+    else if (node->parent->left == node)
+        return true;
+    else
+        return false;
+}
