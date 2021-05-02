@@ -16,12 +16,17 @@ public:
 
     std::string toStr();
     std::string toTex();
+    expr_tree derivative();
 
 private:
     std::string toStr(const expr_node* node);
     std::string toTex(const expr_node* node);
     std::string valueToStr(const expr_node& node);
     std::string texify(const expr_node& node);
+    expr_node* derivative(const expr_node* node);
+    expr_node* mulDeriv(const expr_node* node);
+    expr_node* divDeriv(const expr_node* node);
+
 };
 
 std::string OpToTex(int op);

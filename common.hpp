@@ -64,6 +64,7 @@ public:
     friend void Link(expr_node* _parent, expr_node* _left, expr_node* _right);
 };
 
+expr_node* Copy(const expr_node* src);
 tld::vector<fs::path> FillPathv(int names_count, char* names[]);
 size_t Extract(const std::string& where_from, std::string& where_to, size_t pos, const char delim);
 size_t Extract(const std::string& where_from, std::string& where_to, size_t pos, const char* delim);

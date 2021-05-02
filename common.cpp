@@ -76,6 +76,22 @@ void Link(expr_node* _parent, expr_node* _left, expr_node* _right)
         _right->parent = _parent;
 }
 
+expr_node* Copy(const expr_node* src)
+{
+    if (src == nullptr)
+        return nullptr;
+    expr_node* dst = new expr_node(src->type, src->value, nullptr, nullptr, nullptr);
+    if (src->left) {
+        dst->left = Copy(src->left);
+        dst->left->parent = dst;
+    }
+    if (src->right) {
+        dst->right = Copy(src->right);
+        dst->right->parent = dst;
+    }
+    return dst;
+}
+
 size_t Extract(const std::string& where_from, std::string& where_to, size_t pos, const char delim)
 {
     size_t end = where_from.find_first_of(delim, pos);

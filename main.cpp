@@ -11,7 +11,7 @@ int process_file(std::ifstream& input_fs, std::uintmax_t input_size, std::ofstre
     if (err_code != OK)
         return err_code;
     else {
-        std::string output = function.toTex();
+        std::string output = function.derivative().toTex();
         output_fs.write(output.c_str(), output.size());
         return OK;
     }

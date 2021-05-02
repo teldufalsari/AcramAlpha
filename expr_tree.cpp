@@ -136,3 +136,64 @@ std::string ParToTex(const std::string& par)
     }
     return output;
 }
+
+expr_node* expr_tree::derivative(const expr_node* node)
+{
+    expr_node* deriv = nullptr;
+    if (node->type == OP) {
+        switch (node->value.integer) {
+        case ADD:
+            deriv = new expr_node(OP, (long)ADD);
+            deriv->left = derivative(node->left);
+            deriv->right = derivative(node->right);
+            Link(deriv, deriv->left, deriv->right);
+            break;
+        case SUB:
+            deriv = new expr_node(OP, (long)SUB);
+            deriv->left = derivative(node->left);
+            deriv->right = derivative(node->right);
+            Link(deriv, deriv->left, deriv->right);
+            break;
+        case MUL:
+            deriv = mulDeriv(node);
+            break;
+        case DIV:
+            deriv = divDeriv(node);
+            break;
+        default:
+            break;
+        }
+    } else if (node->type == VAR) {
+        deriv = new expr_node(INT, (long)1, nullptr, nullptr, nullptr);
+    } else {
+        deriv = new expr_node(INT, (long)0, nullptr, nullptr, nullptr);
+    }
+    return deriv;
+}
+
+expr_tree expr_tree::derivative()
+{
+    return expr_tree(derivative(this->root_), this->parameters_, this->variable_);
+}
+
+expr_node* expr_tree::mulDeriv(const expr_node* node)
+{
+    expr_node* deriv = new expr_node(OP, (long)ADD);
+    deriv->left = new expr_node(OP, (long)MUL, nullptr, derivative(node->left), Copy(node->right));
+    deriv->right = new expr_node(OP, (long)MUL, nullptr, Copy(node->left), derivative(node->right));
+    Link(deriv, deriv->left, deriv->right);
+    return deriv;
+}
+
+expr_node* expr_tree::divDeriv(const expr_node* node)
+{
+    expr_node* deriv = new expr_node(OP, (long)DIV);
+    deriv->left = mulDeriv(node);
+    deriv->left->value.integer = SUB;
+    deriv->right = new expr_node(OP, (long)PWR);
+    deriv->right->left = Copy(node->right);
+    deriv->right->right = new expr_node(INT, (long)2);
+    Link(deriv->right, deriv->right->left, deriv->right->right);
+    Link(deriv, deriv->left, deriv->right);
+    return deriv;
+}
