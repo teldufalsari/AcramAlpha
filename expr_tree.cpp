@@ -70,7 +70,8 @@ std::string expr_tree::texify(const expr_node& node)
 std::string expr_tree::toTex(const expr_node* node)
 {
     std::string output;
-    if (node->parent != nullptr && Priority(*(node->parent)) <= Priority(*node))
+    bool need_parentheses = NeedParentheses(*node);
+    if (need_parentheses)
         output += "(";
     if (node->type == OP && node->value.integer == DIV) {
         output += "{" + texify(*node) + "{" + toTex(node->left) + "}{" + toTex(node->right) + "}}";
@@ -83,7 +84,7 @@ std::string expr_tree::toTex(const expr_node* node)
             output += toTex(node->right);
         output += "}";
     }
-    if (node->parent != nullptr && Priority(*(node->parent)) <= Priority(*node))
+    if (need_parentheses)
         output += ")";
     return output;
 }
@@ -127,7 +128,7 @@ std::string ParToTex(const std::string& par)
 {
     std::string output(1, par[0]);
     if (par.size() > 1) {
-        output += std::string("_") + par.substr(1);
+        output += std::string("_{") + par.substr(1) + std::string("}");
     }
     return output;
 }

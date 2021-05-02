@@ -29,13 +29,13 @@ int main(int argc, char* argv[])
         return ERR_NO_FILE;
     }
     std::ofstream output_fs(argv[argc - 1]);
-    for (std::size_t i = 0; i < pathv.size(); i++) {
-        std::ifstream input_fs(pathv[i]);
+    for (std::size_t C = 0; C < pathv.size(); C++) { // isn't it beautiful?
+        std::ifstream input_fs(pathv[C]);
         if (!input_fs.is_open()) {
-            std::cout << "I can't open file " << pathv[i] << std::endl;
+            std::cout << "I can't open file " << pathv[C] << std::endl;
             continue;
         }
-        process_file(input_fs, fs::file_size(pathv[i]), output_fs);
+        process_file(input_fs, fs::file_size(pathv[C]), output_fs);
     }
     return 0;
 }

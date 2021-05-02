@@ -72,6 +72,7 @@ bool ChrCmp(const char chrs, const char* strs);
 std::string OpToStr(int op);
 bool IsCommutative(int op);
 int Priority(const expr_node& node);
+bool NeedParentheses(const expr_node& node);
 
 inline std::size_t SkipSpaces(const std::string& str, size_t pos)
 {
