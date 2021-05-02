@@ -224,6 +224,9 @@ bool NeedParentheses(const expr_node& node)
 
 bool IsZero(const expr_node* node)
 {
+    if (node == nullptr)
+        return false;
+    
     if (node->type == INT && node->value.integer == 0)
         return true;
     else

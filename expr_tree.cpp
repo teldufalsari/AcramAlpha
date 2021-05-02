@@ -72,7 +72,7 @@ std::string expr_tree::toTex(const expr_node* node)
     std::string output;
     bool need_parentheses = NeedParentheses(*node);
     if (need_parentheses)
-        output += "(";
+        output += "{(";
     if (node->type == OP && node->value.integer == DIV) {
         output += "{" + texify(*node) + "{" + toTex(node->left) + "}{" + toTex(node->right) + "}}";
     } else  if (node->type == OP && node->value.integer == SQRT) {
@@ -87,7 +87,7 @@ std::string expr_tree::toTex(const expr_node* node)
         output += "}";
     }
     if (need_parentheses)
-        output += ")";
+        output += ")}";
     return output;
 }
 
@@ -160,6 +160,30 @@ expr_node* expr_tree::derivative(const expr_node* node)
         case DIV:
             deriv = divDeriv(node);
             break;
+        case SQRT:
+            deriv = new expr_node(OP, (long)MUL);
+            deriv->left = sqrtDeriv(node);
+            deriv->right = derivative(node->right);
+            Link(deriv, deriv->left, deriv->right);
+            break;
+        case EXP:
+            deriv = expDeriv(node);
+            break;
+        case PWR:
+            deriv = pwrDeriv(node);
+            break;
+        case SIN:
+            deriv = new expr_node(OP, (long)MUL);
+            deriv->left = sinDeriv(node);
+            deriv->right = derivative(node->right);
+            Link(deriv, deriv->left, deriv->right);
+            break;
+        case COS:
+            deriv = new expr_node(OP, (long)MUL);
+            deriv->left = cosDeriv(node);
+            deriv->right = derivative(node->right);
+            Link(deriv, deriv->left, deriv->right);
+            break;
         default:
             break;
         }
@@ -178,7 +202,7 @@ expr_tree expr_tree::derivative()
 
 expr_node* expr_tree::mulDeriv(const expr_node* node)
 {
-    expr_node* deriv = new expr_node(OP, (long)ADD);
+    auto deriv = new expr_node(OP, (long)ADD);
     deriv->left = new expr_node(OP, (long)MUL, nullptr, derivative(node->left), Copy(node->right));
     Link(deriv->left, deriv->left->left, deriv->left->right);
     deriv->right = new expr_node(OP, (long)MUL, nullptr, Copy(node->left), derivative(node->right));
@@ -189,7 +213,7 @@ expr_node* expr_tree::mulDeriv(const expr_node* node)
 
 expr_node* expr_tree::divDeriv(const expr_node* node)
 {
-    expr_node* deriv = new expr_node(OP, (long)DIV);
+    auto deriv = new expr_node(OP, (long)DIV);
     deriv->left = mulDeriv(node);
     deriv->left->value.integer = SUB;
     deriv->right = new expr_node(OP, (long)PWR);
@@ -197,6 +221,62 @@ expr_node* expr_tree::divDeriv(const expr_node* node)
     deriv->right->right = new expr_node(INT, (long)2);
     Link(deriv->right, deriv->right->left, deriv->right->right);
     Link(deriv, deriv->left, deriv->right);
+    return deriv;
+}
+
+expr_node* expr_tree::sqrtDeriv(const expr_node* node)
+{
+    auto deriv = new expr_node(OP, (long)DIV);
+    deriv->left = new expr_node(INT, (long)1, deriv, nullptr, nullptr);
+    deriv->right = new expr_node(OP, (long)MUL, deriv, nullptr, nullptr);
+    expr_node* denum = deriv->right;
+    denum->left = new expr_node(INT, (long)2);
+    denum->right = Copy(node);
+    Link(denum, denum->left, denum->right);
+    Link(deriv, deriv->left, deriv->right);
+    return deriv;
+}
+
+expr_node* expr_tree::expDeriv(const expr_node* node)
+{
+    auto deriv = new expr_node(OP, (long)MUL);
+    deriv->left = Copy(node);
+    deriv->right = derivative(node->right);
+    Link(deriv, deriv->left, deriv->right);
+    return deriv;
+}
+
+expr_node* expr_tree::pwrDeriv(const expr_node* node)
+{
+    auto deriv = new expr_node(OP, (long)MUL);
+    deriv->left = Copy(node->right);
+    deriv->right = new expr_node(OP, (long)PWR);
+    auto new_pwr = new expr_node(OP, (long)SUB);
+    new_pwr->left = Copy(node->right);
+    new_pwr->right = new expr_node(INT, (long)1);
+    Link(new_pwr, new_pwr->left, new_pwr->right);
+    deriv->right->right = new_pwr;
+    deriv->right->left = Copy(node->left);
+    Link(deriv->right, deriv->right->left, deriv->right->right);
+    Link(deriv, deriv->left, deriv->right);
+    return deriv;
+}
+
+expr_node* expr_tree::sinDeriv(const expr_node* node)
+{
+    auto deriv = new expr_node(OP, (long)COS);
+    deriv->right = Copy(node->right);
+    Link(deriv, nullptr, deriv->right);
+    return deriv;
+}
+
+expr_node* expr_tree::cosDeriv(const expr_node* node)
+{
+    auto deriv = new expr_node(OP, (long)SUB);
+    deriv->right = new expr_node(OP, (long)SIN);
+    deriv->right->right = Copy(node->right);
+    Link(deriv->right, nullptr, deriv->right->right);
+    Link(deriv, nullptr, deriv->right);
     return deriv;
 }
 
