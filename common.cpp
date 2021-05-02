@@ -191,7 +191,7 @@ bool NeedParentheses(const expr_node& node)
 {
     if (node.parent == nullptr) {
         return false;
-    } else if (node.parent->value.integer == DIV) {
+    } else if (node.parent->value.integer == DIV || node.parent->value.integer == SQRT) {
         return false;
     } else if (Priority(*(node.parent)) < Priority(node)) {
         return true;

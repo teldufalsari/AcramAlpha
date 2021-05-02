@@ -199,6 +199,8 @@ int expr_parser::findFunction(const std::string& func)
         return EXP;
     else if (func == "ln" || func == "log")
         return LOG;
+    else if (func == "sqrt" || func == "squirt")
+        return SQRT;
     else
         return NONE;
 }

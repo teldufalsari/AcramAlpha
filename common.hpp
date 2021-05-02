@@ -25,7 +25,7 @@ enum node_types {
 enum operations {
     NONE = 0,
     ADD, SUB, MUL, DIV,
-    PWR, EXP, LOG,
+    PWR, EXP, LOG, SQRT,
     SIN, COS, TAN, COT
 };
 

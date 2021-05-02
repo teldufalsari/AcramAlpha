@@ -75,6 +75,8 @@ std::string expr_tree::toTex(const expr_node* node)
         output += "(";
     if (node->type == OP && node->value.integer == DIV) {
         output += "{" + texify(*node) + "{" + toTex(node->left) + "}{" + toTex(node->right) + "}}";
+    } else  if (node->type == OP && node->value.integer == SQRT) {
+        output += "{" + texify(*node) + "{" + toTex(node->right) + "}}";
     } else {
         output += "{";
         if (node->left != nullptr)
@@ -106,19 +108,21 @@ std::string OpToTex(int op)
     case DIV:
         return "\\frac";
     case COS:
-        return "cos";
+        return "\\cos";
     case SIN:
-        return "sin";
+        return "\\sin";
     case TAN:
-        return "tan";
+        return "\\tan";
     case COT:
-        return "cot";
+        return "\\cot";
     case EXP:
-        return "exp";
+        return "\\exp";
     case PWR:
         return "^";
     case LOG:
-        return "log";
+        return "\\log";
+    case SQRT:
+        return "\\sqrt";
     default:
         return "nil";
     }
