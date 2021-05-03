@@ -27,7 +27,7 @@ public:
         T _n_value;
 
         /// Height of the subtree with a root in this node.
-        unsigned char height;
+        int height;
 
         /// Pointer to the left child node.
         tree_node* left;
@@ -48,6 +48,12 @@ public:
          * @param that Reference to the source object.
          */
         tree_node(const tree_node& that);
+
+        /**
+         * @brief Move constructor.
+         * @param that Reference to the source object.
+         */
+        tree_node(tree_node&& that) noexcept;
 
         /**
          * @brief Trivial destructor.
@@ -73,8 +79,8 @@ private:
     void RotateLeft(tree_node* old_root);
     void RotateRight(tree_node* old_root);
     void Balance(tree_node* p_tree);
-    inline unsigned char Height(tree_node* p_node);
-    char Diff(tree_node* p_node);
+    inline int Height(tree_node* p_node);
+    int Diff(tree_node* p_node);
     void SetHeight(tree_node* p_node);
 
 public:
@@ -90,6 +96,12 @@ public:
     avl_tree(const avl_tree& that);
 
     /**
+     * @brief Move constructor for a tree.
+     * @param that Reference to the source object.
+     */
+    avl_tree(avl_tree&& that) noexcept;
+
+    /**
      * @brief Recursively frees allocated memory.
      */
     ~avl_tree();
@@ -100,6 +112,13 @@ public:
      * @return Reference to the tree object to create assignment chains.
      */
     avl_tree& operator =(const avl_tree& that);
+
+    /**
+     * @brief Move assignment operator for a tree.
+     * @param that Reference to the source object.
+     * @return Reference to the tree object to create assignment chains.
+     */
+    avl_tree& operator =(avl_tree&& that) noexcept;
 
     /**
      * @brief Inserts a new element into the container.
@@ -141,18 +160,31 @@ inline bool operator ==(const avl_tree<T>& lht, const avl_tree<T>& rht);
 // ### TREE_NODE ###
 
 template <typename T>
-avl_tree<T>::tree_node::tree_node(): _n_value(), height(1), left(nullptr), parent(nullptr), right(nullptr)
+avl_tree<T>::tree_node::tree_node() :
+    _n_value(),
+    height(1),
+    left(nullptr),
+    parent(nullptr),
+    right(nullptr)
 {}
 
 template <typename T>
-avl_tree<T>::tree_node::tree_node(const avl_tree::tree_node& that)
-{
-    this->_n_value = that._n_value;
-    this->height = that.height;
-    this->left = nullptr;
-    this->parent = nullptr;
-    this->right = nullptr;
-}
+avl_tree<T>::tree_node::tree_node(const avl_tree::tree_node& that) :
+    _n_value(that._n_value),
+    height(that.height),
+    left(nullptr),
+    parent(nullptr),
+    right(nullptr)
+{}
+
+template <typename T>
+avl_tree<T>::tree_node::tree_node(tree_node&& that) noexcept :
+    _n_value(std::move(that._n_value)),
+    height(that.height),
+    left(nullptr),
+    parent(nullptr),
+    right(nullptr)
+{}
 
 template <typename T>
 avl_tree<T>::tree_node::~tree_node() = default;
@@ -161,15 +193,23 @@ avl_tree<T>::tree_node::~tree_node() = default;
 // ### AVL_TREE ###
 
 template <typename T>
-avl_tree<T>::avl_tree() : root_(nullptr)
+avl_tree<T>::avl_tree() :
+    root_(nullptr)
 {}
 
 template <typename T>
-avl_tree<T>::avl_tree(const avl_tree& that)
+avl_tree<T>::avl_tree(const avl_tree& that) :
+    root_(nullptr)
 {
-    this->root_ = nullptr;
     if (that.root_)
         Copy(&(this->root_), *(that.root_));
+}
+
+template <typename T>
+avl_tree<T>::avl_tree(avl_tree&& that) noexcept :
+    root_(that.root_)
+{
+    that.root_ = nullptr;
 }
 
 template <typename T>
@@ -290,22 +330,22 @@ void avl_tree<T>::Balance(avl_tree::tree_node* p_tree)
 }
 
 template <typename T>
-unsigned char avl_tree<T>::Height(avl_tree::tree_node* p_node)
+int avl_tree<T>::Height(avl_tree::tree_node* p_node)
 {
     return (p_node ? p_node->height : 0);
 }
 
 template <typename T>
-char avl_tree<T>::Diff(avl_tree::tree_node* p_node)
+int avl_tree<T>::Diff(avl_tree::tree_node* p_node)
 {
-    return (char)(Height(p_node->right) - Height(p_node->left));
+    return Height(p_node->right) - Height(p_node->left);
 }
 
 template <typename T>
 void avl_tree<T>::SetHeight(avl_tree::tree_node* p_node)
 {
-    unsigned char hl = Height(p_node->left);
-    unsigned char hr = Height(p_node->right);
+    int hl = Height(p_node->left);
+    int hr = Height(p_node->right);
     p_node->height = (hl > hr ? hl : hr) + 1;
 }
 
@@ -459,6 +499,14 @@ avl_tree<T>& avl_tree<T>::operator =(const avl_tree& that)
     this->Destroy();
     if (that.root_)
         Copy(&(this->root_), *(that.root_));
+    return *this;
+}
+
+template <typename T>
+avl_tree<T>& avl_tree<T>::operator =(avl_tree&& that) noexcept
+{
+    this->root_ = that.root_;
+    that.root_ = nullptr;
     return *this;
 }
 
