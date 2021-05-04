@@ -265,6 +265,8 @@ bool IsArith(const expr_node* node)
 
 bool IsCalculable(const expr_node* node)
 {
+    if (node->left == nullptr || node->right == nullptr)
+        return false;
     if (
         IsArith(node) &&
         node->left->type == INT &&
