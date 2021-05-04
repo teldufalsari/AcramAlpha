@@ -211,6 +211,8 @@ bool NeedParentheses(const expr_node& node)
         return false;
     } else if (!IsOnLeft(&node) && node.parent->value.integer == PWR) {
         return false;
+    }   else if (node.value.integer == PWR && node.parent->value.integer == PWR && IsOnLeft(&node)) {
+        return true;
     } else if (Priority(*(node.parent)) < Priority(node)) {
         return true;
     } else if (
@@ -237,6 +239,8 @@ bool IsZero(const expr_node* node)
 
 bool IsOne(const expr_node* node)
 {
+    if (node == nullptr)
+        return false;
     if (node->type == INT && node->value.integer == 1)
         return true;
     else
