@@ -10,6 +10,7 @@ class expr_parser
 {
     const std::string& str_;
     std::string variable_;
+    std::string name_;
     tld::vector<std::string> parameters_;
     std::size_t parameters_count_;
     std::size_t pos_;
@@ -36,6 +37,7 @@ private:
     expr_node* getSymbol(const std::string& symbol);
     int findFunction(const std::string& func);
     void raise(int err_code);
+    void getName();
 };
 
 

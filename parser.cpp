@@ -5,6 +5,7 @@
 expr_parser::expr_parser(const std::string& _str) :
     str_(_str),
     variable_(std::string()),
+    name_(std::string()),
     parameters_(),
     parameters_count_(0),
     pos_(0),
@@ -31,6 +32,8 @@ std::string expr_parser::strerror() const
         return "error: could not found an expression";
     case ERR_GARBAGE:
         return "error: garbage symbols found since position " + std::to_string(pos_);
+    case ERR_NO_EQUAL_SIGN:
+        return "ёлы-палы, мальчики и девочки, равна нету (pos = " + std::to_string(pos_) + ')';
     default:
         return "unknown error at position " + std::to_string(pos_);
     }
@@ -38,13 +41,10 @@ std::string expr_parser::strerror() const
 
 expr_tree expr_parser::read()
 {
-    pos_ = SkipSpaces(str_, pos_);
-    pos_ = Extract(str_, variable_, pos_, " \t\n");
-    if (pos_ == std::string::npos) {
-        errno_ = ERR_NO_EXPR;
+    getName();
+    if (errno_)
         return expr_tree();
-    }
-    pos_ = SkipSpaces(str_, pos_);
+    pos_ = SkipSpaces(str_, pos_ + 1);
     expr_node* root = getExpr();
     Link(root, root->left, root->right);
     if (errno_) {
@@ -57,7 +57,7 @@ expr_tree expr_parser::read()
         delete root;
         return expr_tree();
     }
-    return expr_tree(root, parameters_, variable_);
+    return expr_tree(root, parameters_, variable_, name_);
 }
 
 expr_node* expr_parser::getExpr()
@@ -258,4 +258,33 @@ void expr_parser::raise(int err_code)
 {
     if (errno_ == OK)
         errno_ = err_code;
+}
+
+void expr_parser::getName()
+{
+    pos_ = SkipSpaces(str_, pos_);
+    pos_ = Extract(str_, name_, pos_, "( \t\n");
+    if (pos_ == std::string::npos) {
+        errno_ = ERR_NO_EXPR;
+        return;
+    }
+    pos_ = SkipSpaces(str_, pos_);
+    if (str_[pos_] != '(') {
+        raise(ERR_NO_EXPR);
+        return;
+    }
+    pos_ = SkipSpaces(str_, pos_ + 1);
+    pos_ = Extract(str_, variable_, pos_, ") \t\n");
+    if (pos_ == std::string::npos) {
+        errno_ = ERR_NO_EXPR;
+        return;
+    }
+    pos_ = SkipSpaces(str_, pos_);
+    if (str_[pos_] != ')') {
+        raise(ERR_CLOSING_PAR);
+        return;
+    }
+    pos_ = SkipSpaces(str_, pos_ + 1);
+    if (str_[pos_] != '=')
+        raise(ERR_NO_EQUAL_SIGN);
 }

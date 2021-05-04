@@ -15,8 +15,8 @@ int process_file(std::ifstream& input_fs, std::uintmax_t input_size, tex_sentry&
     else {
         auto deriv = function.derivative();
         deriv.simplify();
-        output_pipe.transmit("\\begin{dmath*}\n f(x)=" + function.toTex() + "\\end{dmath*}\n");
-        output_pipe.transmit("\\begin{dmath*}\n f'(x)=" + deriv.toTex() + "\\end{dmath*}\n");
+        output_pipe.transmit("\\begin{dmath*}\n" + function.getName() + '(' + function.getVar() + ")=" + function.toTex() + "\\end{dmath*}\n");
+        output_pipe.transmit("\\begin{dmath*}\n" + deriv.getName() + '(' + deriv.getVar() + ")=" + deriv.toTex() + "\\end{dmath*}\n");
         return OK;
     }
 }

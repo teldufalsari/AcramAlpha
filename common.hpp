@@ -15,7 +15,8 @@ enum error_codes {
     ERR_NO_OPERAND,
     ERR_INVALID_OPERAND,
     ERR_NO_EXPR,
-    ERR_GARBAGE
+    ERR_GARBAGE,
+    ERR_NO_EQUAL_SIGN
 };
 
 enum node_types {

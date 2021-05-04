@@ -5,10 +5,11 @@ expr_tree::~expr_tree()
     delete root_;
 }
 
-expr_tree::expr_tree(expr_node* _root, const tld::vector<std::string>& _parameters, const std::string& _variable) :
+expr_tree::expr_tree(expr_node* _root, const tld::vector<std::string>& _parameters, const std::string& _variable, const std::string& _name) :
     root_(_root),
     parameters_(_parameters),
-    variable_(_variable)
+    variable_(_variable),
+    name_(_name)
 {}
 
 std::string expr_tree::toStr(const expr_node* node)
@@ -212,7 +213,7 @@ expr_node* expr_tree::derivative(const expr_node* node)
 
 expr_tree expr_tree::derivative()
 {
-    return expr_tree(derivative(this->root_), this->parameters_, this->variable_);
+    return expr_tree(derivative(this->root_), this->parameters_, this->variable_, this->name_ + "'");
 }
 
 expr_node* expr_tree::mulDeriv(const expr_node* node)
@@ -356,6 +357,16 @@ void expr_tree::simplify(expr_node* node)
 void expr_tree::simplify()
 {
     simplify(root_);
+}
+
+const std::string& expr_tree::getName()
+{
+    return name_;
+}
+
+std::string expr_tree::getVar()
+{
+    return ParToTex(this->variable_);
 }
 
 void expr_tree::mulSimplifs(expr_node* node)
