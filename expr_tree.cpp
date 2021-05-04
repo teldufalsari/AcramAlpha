@@ -160,8 +160,10 @@ expr_node* expr_tree::derivative(const expr_node* node)
             break;
         case SUB:
             deriv = new expr_node(OP, (long)SUB);
-            if (deriv->left != nullptr)
+            if (node->left != nullptr)
                 deriv->left = derivative(node->left);
+            else
+                deriv->left = nullptr;
             deriv->right = derivative(node->right);
             Link(deriv, deriv->left, deriv->right);
             break;
