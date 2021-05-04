@@ -106,23 +106,23 @@ std::string OpToTex(int op)
     case MUL:
         return "\\cdot ";
     case DIV:
-        return "\\frac";
+        return "\\frac ";
     case COS:
-        return "\\cos";
+        return "\\cos ";
     case SIN:
-        return "\\sin";
+        return "\\sin ";
     case TAN:
-        return "\\tan";
+        return "\\tan ";
     case COT:
-        return "\\cot";
+        return "\\cot ";
     case EXP:
-        return "\\exp";
+        return "\\exp ";
     case PWR:
         return "^";
     case LOG:
-        return "\\log";
+        return "\\log ";
     case SQRT:
-        return "\\sqrt";
+        return "\\sqrt ";
     default:
         return "nil";
     }
@@ -170,7 +170,10 @@ expr_node* expr_tree::derivative(const expr_node* node)
             deriv = expDeriv(node);
             break;
         case PWR:
-            deriv = pwrDeriv(node);
+            deriv = new expr_node(OP, (long)MUL);
+            deriv->left = derivative(node->left);
+            deriv->right = pwrDeriv(node);
+            Link(deriv, deriv->left, deriv->right);
             break;
         case SIN:
             deriv = new expr_node(OP, (long)MUL);

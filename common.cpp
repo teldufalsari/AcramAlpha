@@ -182,10 +182,10 @@ int Priority(const expr_node& node)
         case COT:
         case EXP:
         case LOG:
-            return 1;
+            return 3;
         
         case PWR:
-            return 3;
+            return 2;
         
         case MUL:
         case DIV:
@@ -199,7 +199,7 @@ int Priority(const expr_node& node)
             return -1;
         }
     } else {
-        return 2;
+        return 1;
     }
 }
 
@@ -208,6 +208,8 @@ bool NeedParentheses(const expr_node& node)
     if (node.parent == nullptr) {
         return false;
     } else if (node.parent->value.integer == DIV || node.parent->value.integer == SQRT) {
+        return false;
+    } else if (!IsOnLeft(&node) && node.parent->value.integer == PWR) {
         return false;
     } else if (Priority(*(node.parent)) < Priority(node)) {
         return true;
