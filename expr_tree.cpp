@@ -72,22 +72,22 @@ std::string expr_tree::toTex(const expr_node* node)
     std::string output;
     bool need_parentheses = NeedParentheses(*node);
     if (need_parentheses)
-        output += "{(";
+        output += "\\left(";
     if (node->type == OP && node->value.integer == DIV) {
         output += "{" + texify(*node) + "{" + toTex(node->left) + "}{" + toTex(node->right) + "}}";
     } else  if (node->type == OP && node->value.integer == SQRT) {
-        output += "{" + texify(*node) + "{" + toTex(node->right) + "}}";
+        output += texify(*node) + "{" + toTex(node->right) + "}";
+    } else if (node->type == OP && node->value.integer == PWR) {
+        output += toTex(node->left) + texify(*node) + "{" + toTex(node->right) + "}";
     } else {
-        output += "{";
         if (node->left != nullptr)
             output += toTex(node->left);
         output += texify(*node);
         if (node->right != nullptr)
             output += toTex(node->right);
-        output += "}";
     }
     if (need_parentheses)
-        output += ")}";
+        output += "\\right)";
     return output;
 }
 
@@ -104,7 +104,7 @@ std::string OpToTex(int op)
     case SUB:
         return "-";
     case MUL:
-        return "\\cdot";
+        return "\\cdot ";
     case DIV:
         return "\\frac";
     case COS:
@@ -358,23 +358,21 @@ void expr_tree::mulSimplifs(expr_node* node)
         node->type = INT;
         node->value.integer = 0;
     } else if (IsOne(node->left)) {
-        // connect this node->parent and this node->left subtree
-        if (IsOnLeft(node)) {
-            Link(node->parent, node->right, node->parent->right);
-        } else
-            Link(node->parent, node->parent->left, node->right);
-        // safely remove this node
-        node->right = nullptr;
-        delete node;
+        expr_node* tmp = node->right;
+        delete node->left;
+        node->type = tmp->type;
+        node->value = tmp->value;
+        Link(node, tmp->left, tmp->right);
+        tmp->left = tmp->right = nullptr;
+        delete tmp;
     } else if (IsOne(node->right)) {
-        // connect this node->parent and this node->left subtree
-        if (IsOnLeft(node)) {
-            Link(node->parent, node->left, node->parent->right);
-        } else
-            Link(node->parent, node->parent->left, node->left);
-        // safely remove this node
-        node->left = nullptr;
-        delete node;
+        expr_node* tmp = node->left;
+        delete node->right;
+        node->type = tmp->type;
+        node->value = tmp->value;
+        Link(node, tmp->left, tmp->right);
+        tmp->left = tmp->right = nullptr;
+        delete tmp;
     }
 }
 
@@ -387,37 +385,34 @@ void expr_tree::divSimplifs(expr_node* node)
         node->type = INT;
         node->value.integer = 0;
     } else if (IsOne(node->right)) {
-        // connect this node->parent and this node->left subtree
-        if (IsOnLeft(node)) {
-            Link(node->parent, node->left, node->parent->right);
-        } else
-            Link(node->parent, node->parent->left, node->left);
-        // safely remove this node
-        node->left = nullptr;
-        delete node;
+        expr_node* tmp = node->left;
+        delete node->right;
+        node->type = tmp->type;
+        node->value = tmp->value;
+        Link(node, tmp->left, tmp->right);
+        tmp->left = tmp->right = nullptr;
+        delete tmp;
     }
 }
 
 void expr_tree::addSimplifs(expr_node* node)
 {
     if (IsZero(node->left)) {
-        // connect this node->parent and this node->left subtree
-        if (IsOnLeft(node)) {
-            Link(node->parent, node->right, node->parent->right);
-        } else
-            Link(node->parent, node->parent->left, node->right);
-        // safely remove this node
-        node->right = nullptr;
-        delete node;
+        expr_node* tmp = node->right;
+        delete node->left;
+        node->type = tmp->type;
+        node->value = tmp->value;
+        Link(node, tmp->left, tmp->right);
+        tmp->left = tmp->right = nullptr;
+        delete tmp;
     } else if (IsZero(node->right)) {
-        // connect this node->parent and this node->left subtree
-        if (IsOnLeft(node)) {
-            Link(node->parent, node->left, node->parent->right);
-        } else
-            Link(node->parent, node->parent->left, node->left);
-        // safely remove this node
-        node->left = nullptr;
-        delete node;
+        expr_node* tmp = node->left;
+        delete node->right;
+        node->type = tmp->type;
+        node->value = tmp->value;
+        Link(node, tmp->left, tmp->right);
+        tmp->left = tmp->right = nullptr;
+        delete tmp;
     }
 }
 
@@ -427,13 +422,12 @@ void expr_tree::subSimplifs(expr_node* node)
         delete node->left;
         node->left = nullptr;
     } else if (IsZero(node->right)) {
-        // connect this node->parent and this node->left subtree
-        if (IsOnLeft(node)) {
-            Link(node->parent, node->left, node->parent->right);
-        } else
-            Link(node->parent, node->parent->left, node->left);
-        // safely remove this node
-        node->left = nullptr;
-        delete node;
+        expr_node* tmp = node->left;
+        delete node->right;
+        node->type = tmp->type;
+        node->value = tmp->value;
+        Link(node, tmp->left, tmp->right);
+        tmp->left = tmp->right = nullptr;
+        delete tmp;
     }
 }
