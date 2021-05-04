@@ -40,6 +40,8 @@ private:
     void divSimplifs(expr_node* node);
     void addSimplifs(expr_node* node);
     void subSimplifs(expr_node* node);
+    void calcSimplifs(expr_node* node);
+    void pwrSimplifs(expr_node* node);
 
 };
 

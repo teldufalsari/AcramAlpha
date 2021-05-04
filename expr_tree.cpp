@@ -162,8 +162,8 @@ expr_node* expr_tree::derivative(const expr_node* node)
             break;
         case SQRT:
             deriv = new expr_node(OP, (long)MUL);
-            deriv->left = sqrtDeriv(node);
-            deriv->right = derivative(node->right);
+            deriv->left = derivative(node->right);
+            deriv->right = sqrtDeriv(node);
             Link(deriv, deriv->left, deriv->right);
             break;
         case EXP:
@@ -174,26 +174,26 @@ expr_node* expr_tree::derivative(const expr_node* node)
             break;
         case SIN:
             deriv = new expr_node(OP, (long)MUL);
-            deriv->left = sinDeriv(node);
-            deriv->right = derivative(node->right);
+            deriv->left = derivative(node->right);
+            deriv->right = sinDeriv(node);
             Link(deriv, deriv->left, deriv->right);
             break;
         case COS:
             deriv = new expr_node(OP, (long)MUL);
-            deriv->left = cosDeriv(node);
-            deriv->right = derivative(node->right);
+            deriv->left = derivative(node->right);
+            deriv->right = cosDeriv(node);
             Link(deriv, deriv->left, deriv->right);
             break;
         case TAN:
             deriv = new expr_node(OP, (long)MUL);
-            deriv->left = tanDeriv(node);
-            deriv->right = derivative(node->right);
+            deriv->left = derivative(node->right);
+            deriv->right = tanDeriv(node);
             Link(deriv, deriv->left, deriv->right);
             break;
         case COT:
             deriv = new expr_node(OP, (long)MUL);
-            deriv->left = cotDeriv(node);
-            deriv->right = derivative(node->right);
+            deriv->left = derivative(node->right);
+            deriv->right = cotDeriv(node);
             Link(deriv, deriv->left, deriv->right);
             break;
         default:
@@ -325,6 +325,10 @@ void expr_tree::simplify(expr_node* node)
         simplify(node->left);
     if (node->right)
         simplify(node->right);
+    if (IsCalculable(node)) {
+        calcSimplifs(node);
+        return;
+    }
     switch (node->value.integer) {
     case ADD:
         addSimplifs(node);
@@ -337,6 +341,9 @@ void expr_tree::simplify(expr_node* node)
         break;
     case DIV:
         divSimplifs(node);
+        break;
+    case PWR:
+        pwrSimplifs(node);
         break;
     default:
         break;
@@ -422,6 +429,51 @@ void expr_tree::subSimplifs(expr_node* node)
         delete node->left;
         node->left = nullptr;
     } else if (IsZero(node->right)) {
+        expr_node* tmp = node->left;
+        delete node->right;
+        node->type = tmp->type;
+        node->value = tmp->value;
+        Link(node, tmp->left, tmp->right);
+        tmp->left = tmp->right = nullptr;
+        delete tmp;
+    }
+}
+
+void expr_tree::calcSimplifs(expr_node* node)
+{
+    if (node->value.integer == DIV && (node->left->value.integer % node->right->value.integer))
+        return;
+    switch (node->value.integer) {
+    case ADD:
+        node->value.integer = node->left->value.integer + node->right->value.integer;
+        break;
+    case SUB:
+        node->value.integer = node->left->value.integer - node->right->value.integer;
+        break;
+    case MUL:
+        node->value.integer = node->left->value.integer * node->right->value.integer;
+        break;
+    case DIV:
+        node->value.integer = node->left->value.integer / node->right->value.integer;
+        break;
+    default:
+        break;
+    }
+    node->type = INT;
+    delete node->left;
+    delete node->right;
+    node->left = node->right = nullptr;
+}
+
+void expr_tree::pwrSimplifs(expr_node* node)
+{
+    if (IsZero(node->right)) {
+        delete node->left;
+        delete node->right;
+        node->left = node->right = nullptr;
+        node->type = INT;
+        node->value.integer = 1;
+    } else if (IsOne(node->right)) {
         expr_node* tmp = node->left;
         delete node->right;
         node->type = tmp->type;

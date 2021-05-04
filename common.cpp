@@ -250,3 +250,27 @@ bool IsOnLeft(const expr_node* node)
     else
         return false;
 }
+
+bool IsArith(const expr_node* node)
+{
+    if (
+        node->type == OP &&
+        (node->value.integer == ADD || node->value.integer == SUB ||
+        node->value.integer == MUL || node->value.integer == DIV)
+    )
+        return true;
+    else
+        return false;
+}
+
+bool IsCalculable(const expr_node* node)
+{
+    if (
+        IsArith(node) &&
+        node->left->type == INT &&
+        node->right->type == INT
+    )
+        return true;
+    else
+        return false;
+}
