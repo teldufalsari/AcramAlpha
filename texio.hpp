@@ -2,6 +2,7 @@
 #define ACRAM_TEXIO_HPP
 
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/wait.h>
 #include <cstdio>
 #include <string>
