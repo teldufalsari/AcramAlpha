@@ -124,6 +124,14 @@ std::string OpToTex(int op)
         return "\\log ";
     case SQRT:
         return "\\sqrt ";
+    case ASIN:
+        return "\\arcsin ";
+    case ACOS:
+        return "\\arccos ";
+    case ATAN:
+        return "\\arctan ";
+    case ACOT:
+        return "\\arccot ";
     default:
         return "nil";
     }
@@ -198,6 +206,30 @@ expr_node* expr_tree::derivative(const expr_node* node)
             deriv = new expr_node(OP, (long)MUL);
             deriv->left = derivative(node->right);
             deriv->right = cotDeriv(node);
+            Link(deriv, deriv->left, deriv->right);
+            break;
+        case ASIN:
+            deriv = new expr_node(OP, (long)MUL);
+            deriv->left = derivative(node->right);
+            deriv->right = arcsinDeriv(node);
+            Link(deriv, deriv->left, deriv->right);
+            break;
+        case ACOS:
+            deriv = new expr_node(OP, (long)MUL);
+            deriv->left = derivative(node->right);
+            deriv->right = arccosDeriv(node);
+            Link(deriv, deriv->left, deriv->right);
+            break;
+        case ATAN:
+            deriv = new expr_node(OP, (long)MUL);
+            deriv->left = derivative(node->right);
+            deriv->right = arctanDeriv(node);
+            Link(deriv, deriv->left, deriv->right);
+            break;
+        case ACOT:
+            deriv = new expr_node(OP, (long)MUL);
+            deriv->left = derivative(node->right);
+            deriv->right = arccotDeriv(node);
             Link(deriv, deriv->left, deriv->right);
             break;
         default:
@@ -318,6 +350,44 @@ expr_node* expr_tree::cotDeriv(const expr_node* node)
     auto deriv = new expr_node(OP, (long)SUB);
     deriv->right = frac;
     Link(deriv, nullptr, deriv->right);
+    return deriv;
+}
+
+expr_node* expr_tree::arcsinDeriv(const expr_node* node)
+{
+    auto square = new expr_node(OP, (long)PWR, nullptr, Copy(node->right), new expr_node(INT, (long)2));
+    Link(square, square->left, square->right);
+    auto sub = new expr_node(OP, (long)SUB, nullptr, new expr_node(INT, (long)1), square);
+    Link(sub, sub->left, sub->right);
+    auto root = new expr_node(OP, (long)SQRT, nullptr, nullptr, sub);
+    Link(root, root->left, root->right);
+    auto frac = new expr_node(OP, (long)DIV, nullptr, new expr_node(INT, (long)1), root);
+    Link(frac, frac->left, frac->right);
+    return frac;
+}
+
+expr_node* expr_tree::arccosDeriv(const expr_node* node)
+{
+    auto deriv = new expr_node(OP, (long)SUB, nullptr, nullptr, arcsinDeriv(node));
+    Link(deriv, deriv->left, deriv->right);
+    return deriv;
+}
+
+expr_node* expr_tree::arctanDeriv(const expr_node* node)
+{
+    auto square = new expr_node(OP, (long)PWR, nullptr, Copy(node->right), new expr_node(INT, (long)2));
+    Link(square, square->left, square->right);
+    auto sum = new expr_node(OP, (long)ADD, nullptr, new expr_node(INT, (long)1), square);
+    Link(sum, sum->left, sum->right);
+    auto frac = new expr_node(OP, (long)DIV, nullptr, new expr_node(INT, (long)1), sum);
+    Link(frac, frac->left, frac->right);
+    return frac;
+}
+
+expr_node* expr_tree::arccotDeriv(const expr_node* node)
+{
+    auto deriv = new expr_node(OP, (long)SUB, nullptr, nullptr, arctanDeriv(node));
+    Link(deriv, deriv->left, deriv->right);
     return deriv;
 }
 

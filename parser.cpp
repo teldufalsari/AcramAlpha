@@ -236,6 +236,14 @@ int expr_parser::findFunction(const std::string& func)
         return LOG;
     else if (func == "sqrt" || func == "squirt")
         return SQRT;
+    else if (func == "arcsin")
+        return ASIN;
+    else if (func == "arccos")
+        return ACOS;
+    else if (func == "arctan" || func == "arctg")
+        return ATAN;
+    else if (func == "arccot" || func == "arcctg")
+        return ACOT;
     else
         return NONE;
 }

@@ -27,7 +27,8 @@ enum operations {
     NONE = 0,
     ADD, SUB, MUL, DIV,
     PWR, EXP, LOG, SQRT,
-    SIN, COS, TAN, COT
+    SIN, COS, TAN, COT,
+    ASIN, ACOS, ATAN, ACOT
 };
 
 union expr_value

@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
         std::cout << "Acram: couln't run LaTeX executable" << std::endl;
         return tex.getState();
     }
-    tex.transmit("\\documentclass{article}\n\\usepackage[russian]{babel}\n\\usepackage{amsmath}\n\\usepackage{breqn}\n\\begin{document}");
+    tex.transmit("\\documentclass{article}\n\\usepackage[russian]{babel}\n\\usepackage{amsmath}\n\\usepackage{breqn}\n\\DeclareMathOperator{\\arccot}{arccot}\n\\begin{document}");
     for (std::size_t C = 0; C < pathv.size(); C++) { // isn't it beautiful?
         std::ifstream input_fs(pathv[C]);
         if (!input_fs.is_open()) {

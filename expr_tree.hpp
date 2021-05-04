@@ -37,6 +37,10 @@ private:
     expr_node* cosDeriv(const expr_node* node);
     expr_node* tanDeriv(const expr_node* node);
     expr_node* cotDeriv(const expr_node* node);
+    expr_node* arcsinDeriv(const expr_node* node);
+    expr_node* arccosDeriv(const expr_node* node);
+    expr_node* arctanDeriv(const expr_node* node);
+    expr_node* arccotDeriv(const expr_node* node);
 
     void simplify(expr_node* node);
     void mulSimplifs(expr_node* node);
