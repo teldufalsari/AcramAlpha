@@ -283,12 +283,30 @@ bool IsCalculable(const expr_node* node)
         return false;
 }
 
+bool IsNegative(const expr_node* node)
+{
+    if (node == nullptr)
+        return false;
+    else if (node->type == INT && node->value.integer < 0)
+        return true;
+    else if (
+        node->type == OP &&
+        node->value.integer == SUB &&
+        node->left == nullptr &&
+        node->right->type == INT &&
+        node->right->value.integer > 0)
+        return true;
+    return false;
+}
+
+
 static const char* splashes[] = {
     "Утрём нос Стивену Вольфраму!\n",
     "Наши логарифмы 100\\% натуральные!\n",
     "Путём несложных, но громоздких преобразованиий, очевидно, получаем:\n",
     "Ну тут всё и так очевидно\n",
-    "Производная? Да, производная\\dots\n"
+    "Производная? Да, производная\\dots\n",
+    "Дифференцировать и обезьяну компьютер научить можно, а вот интегрировать — это искусство!\n"
     };
 
 std::string Splash()

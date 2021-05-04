@@ -3,12 +3,21 @@
 
 #include "common.hpp"
 
+enum semantic_errors {
+    T_OK,
+    T_ZERO_PWR,
+    T_ZERO_DIVIZION,
+    T_NEGATIVE_ARG,
+    T_LOG_ZERO
+};
+
 class expr_tree
 {
     expr_node* root_;
     tld::vector<std::string> parameters_;
     std::string variable_;
     std::string name_;
+    int errno_;
 
 public:
     expr_tree() = default;
@@ -21,6 +30,9 @@ public:
     void simplify();
     const std::string& getName();
     std::string getVar();
+    void checkSemantics();
+    std::string strerror();
+    int status();
 
 private:
     std::string toStr(const expr_node* node);
@@ -32,6 +44,7 @@ private:
     expr_node* divDeriv(const expr_node* node);
     expr_node* sqrtDeriv(const expr_node* node);
     expr_node* expDeriv(const expr_node* node);
+    expr_node* logDeriv(const expr_node* node);
     expr_node* pwrDeriv(const expr_node* node);
     expr_node* sinDeriv(const expr_node* node);
     expr_node* cosDeriv(const expr_node* node);
@@ -50,6 +63,8 @@ private:
     void calcSimplifs(expr_node* node);
     void pwrSimplifs(expr_node* node);
 
+    int checkSemantics(const expr_node* node);
+    int checkNode(const expr_node* node);
 };
 
 std::string OpToTex(int op);

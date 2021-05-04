@@ -9,7 +9,8 @@ expr_tree::expr_tree(expr_node* _root, const tld::vector<std::string>& _paramete
     root_(_root),
     parameters_(_parameters),
     variable_(_variable),
-    name_(_name)
+    name_(_name),
+    errno_(T_OK)
 {}
 
 std::string expr_tree::toStr(const expr_node* node)
@@ -159,7 +160,8 @@ expr_node* expr_tree::derivative(const expr_node* node)
             break;
         case SUB:
             deriv = new expr_node(OP, (long)SUB);
-            deriv->left = derivative(node->left);
+            if (deriv->left != nullptr)
+                deriv->left = derivative(node->left);
             deriv->right = derivative(node->right);
             Link(deriv, deriv->left, deriv->right);
             break;
@@ -177,6 +179,9 @@ expr_node* expr_tree::derivative(const expr_node* node)
             break;
         case EXP:
             deriv = expDeriv(node);
+            break;
+        case LOG:
+            deriv = logDeriv(node);
             break;
         case PWR:
             deriv = new expr_node(OP, (long)MUL);
@@ -290,6 +295,13 @@ expr_node* expr_tree::expDeriv(const expr_node* node)
     auto deriv = new expr_node(OP, (long)MUL);
     deriv->left = Copy(node);
     deriv->right = derivative(node->right);
+    Link(deriv, deriv->left, deriv->right);
+    return deriv;
+}
+
+expr_node* expr_tree::logDeriv(const expr_node* node)
+{
+    auto deriv = new expr_node(OP, (long)DIV, nullptr, derivative(node->right), Copy(node->right));
     Link(deriv, deriv->left, deriv->right);
     return deriv;
 }
@@ -439,6 +451,68 @@ std::string expr_tree::getVar()
     return ParToTex(this->variable_);
 }
 
+int expr_tree::checkSemantics(const expr_node* node)
+{
+    if (node == nullptr)
+        return T_OK;
+    if (node->type != OP)
+        return T_OK;
+    int state = checkSemantics(node->left);
+    if (state != T_OK)
+        return state;
+    state = checkSemantics(node->right);
+    if (state != T_OK)
+        return state;
+    return checkNode(node);
+}
+
+int expr_tree::checkNode(const expr_node* node)
+{
+    if (node->value.integer == PWR &&
+        IsZero(node->left) &&
+        IsZero(node->right))
+        return T_ZERO_PWR;
+
+    if (node->value.integer == DIV && IsZero(node->right))
+        return T_ZERO_DIVIZION;
+
+    if (node->value.integer == LOG && IsZero(node->right))
+        return T_LOG_ZERO;
+
+    if (node->value.integer == LOG && IsNegative(node->right))
+        return T_NEGATIVE_ARG;
+
+    return T_OK;
+}
+
+void expr_tree::checkSemantics()
+{
+    errno_ = checkSemantics(root_);
+}
+
+std::string expr_tree::strerror()
+{
+    switch (errno_)
+    {
+    case T_ZERO_PWR:
+        return "error: zero power of zero term detected";
+    case T_ZERO_DIVIZION:
+        return "error: division by zero detected";
+    case T_LOG_ZERO:
+        return "error: logarithm of zero";
+    case T_NEGATIVE_ARG:
+        return "error: logarithm of a negative number";
+    default:
+        return "semantic error";
+        break;
+    }
+}
+
+int expr_tree::status()
+{
+    return errno_;
+}
+
 void expr_tree::mulSimplifs(expr_node* node)
 {
     
@@ -525,13 +599,20 @@ void expr_tree::subSimplifs(expr_node* node)
         delete node->left;
         node->left = nullptr;
     } else if (IsZero(node->right)) {
-        expr_node* tmp = node->left;
-        delete node->right;
-        node->type = tmp->type;
-        node->value = tmp->value;
-        Link(node, tmp->left, tmp->right);
-        tmp->left = tmp->right = nullptr;
-        delete tmp;
+        if (node->left == nullptr) {// Unary minus
+            delete node->right;
+            node->right = node->left = nullptr;
+            node->type = INT;
+            node->value.integer = 0;
+        } else {
+            expr_node* tmp = node->left;
+            delete node->right;
+            node->type = tmp->type;
+            node->value = tmp->value;
+            Link(node, tmp->left, tmp->right);
+            tmp->left = tmp->right = nullptr;
+            delete tmp;
+        }
     }
 }
 

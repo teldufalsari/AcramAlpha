@@ -13,6 +13,11 @@ int process_file(std::ifstream& input_fs, std::uintmax_t input_size, tex_sentry&
         return parser.status();
     }
     else {
+        function.checkSemantics();
+        if (function.status() != T_OK) {
+            std::cout << "Acram: " << function.strerror() << std::endl;
+            return function.status();
+        }
         auto deriv = function.derivative();
         deriv.simplify();
         output_pipe.transmit("\\begin{dmath*}\n" + function.getName() + '(' + function.getVar() + ")=" + function.toTex() + "\\end{dmath*}\n");
