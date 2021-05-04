@@ -2,7 +2,6 @@
 #define ACRAM_COMMON_H
 
 #include "lib/vector.h"
-#include "lib/map.h"
 #include <filesystem>
 #include <iostream>
 #include <fstream>
