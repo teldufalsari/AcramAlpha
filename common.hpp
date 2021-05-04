@@ -6,6 +6,8 @@
 #include <filesystem>
 #include <iostream>
 #include <fstream>
+#include <random>
+#include <chrono>
 namespace fs = std::filesystem;
 
 enum error_codes {
@@ -81,6 +83,7 @@ bool IsOne(const expr_node* node);
 bool IsOnLeft(const expr_node* node);
 bool IsArith(const expr_node* node);
 bool IsCalculable(const expr_node* node);
+std::string Splash();
 
 inline std::size_t SkipSpaces(const std::string& str, size_t pos)
 {

@@ -282,3 +282,20 @@ bool IsCalculable(const expr_node* node)
     else
         return false;
 }
+
+static const char* splashes[] = {
+    "Утрём нос Стивену Вольфраму!\n",
+    "Наши логарифмы 100\\% натуральные!\n",
+    "Путём несложных, но громоздких преобразованиий, очевидно, получаем:\n",
+    "Ну тут всё и так очевидно\n",
+    "Производная? Да, производная\\dots\n"
+    };
+
+std::string Splash()
+{
+    std::default_random_engine randomizer;
+    unsigned seed = (unsigned) std::chrono::system_clock::now().time_since_epoch().count();
+    randomizer.seed(seed);
+    unsigned index = randomizer() % (sizeof(splashes) / sizeof(const char*));
+    return std::string(splashes[index]);
+}

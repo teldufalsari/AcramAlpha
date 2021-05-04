@@ -39,6 +39,7 @@ int main(int argc, char* argv[])
         return tex.getState();
     }
     tex.transmit("\\documentclass{article}\n\\usepackage[russian]{babel}\n\\usepackage{amsmath}\n\\usepackage{breqn}\n\\DeclareMathOperator{\\arccot}{arccot}\n\\begin{document}");
+    tex.transmit("\\begin{center}\n{\\Large " + Splash() + "}\n\\end{center}\n");
     for (std::size_t C = 0; C < pathv.size(); C++) { // isn't it beautiful?
         std::ifstream input_fs(pathv[C]);
         if (!input_fs.is_open()) {
