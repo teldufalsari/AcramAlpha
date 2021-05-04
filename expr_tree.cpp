@@ -402,8 +402,8 @@ void expr_tree::divSimplifs(expr_node* node)
     } else if (IsOne(node->left) && node->parent != nullptr && node->parent->type == OP && node->parent->value.integer == MUL) {
         if (IsOnLeft(node)) {
             node->parent->value.integer = DIV;
-            Link(node->parent, node->left, node->parent->right);
-            node->left = nullptr;
+            Link(node->parent, node->parent->right, node->right);
+            node->right = nullptr;
             delete node;
         } else {
             node->parent->value.integer = DIV;
