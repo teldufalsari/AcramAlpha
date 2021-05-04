@@ -20,7 +20,9 @@ public:
     expr_parser(const std::string& _str);
     ~expr_parser() = default;
 
-    expr_tree read(int& err_code);
+    expr_tree read();
+    int status() const;
+    std::string strerror() const;
 
 private:
     expr_node* getNumber();

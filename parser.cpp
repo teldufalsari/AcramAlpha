@@ -11,24 +11,50 @@ expr_parser::expr_parser(const std::string& _str) :
     errno_(OK)
 {}
 
-expr_tree expr_parser::read(int& err_code)
+int expr_parser::status() const
+{
+    return errno_;
+}
+
+std::string expr_parser::strerror() const
+{
+    switch (errno_) {
+    case OK:
+        return "everithing is OK";
+    case ERR_CLOSING_PAR:
+        return "error: expected closing parenthesis at position " + std::to_string(pos_);
+    case ERR_NO_OPERAND:
+        return "error: expected operand at position " + std::to_string(pos_);
+    case ERR_INVALID_OPERAND:
+        return "error: invalid operand at position " + std::to_string(pos_);
+    case ERR_NO_EXPR:
+        return "error: could not found an expression";
+    case ERR_GARBAGE:
+        return "error: garbage symbols found since position " + std::to_string(pos_);
+    default:
+        return "unknown error at position " + std::to_string(pos_);
+    }
+}
+
+expr_tree expr_parser::read()
 {
     pos_ = SkipSpaces(str_, pos_);
     pos_ = Extract(str_, variable_, pos_, " \t\n");
     if (pos_ == std::string::npos) {
-        err_code = ERR_NO_EXPR;
+        errno_ = ERR_NO_EXPR;
         return expr_tree();
     }
     pos_ = SkipSpaces(str_, pos_);
     expr_node* root = getExpr();
     Link(root, root->left, root->right);
     if (errno_) {
-        err_code = errno_;
+        delete root;
         return expr_tree();
     }
     pos_ = SkipSpaces(str_, pos_);
     if (str_[pos_] != '\0') {
-        err_code = ERR_GARBAGE;
+        errno_ = ERR_GARBAGE;
+        delete root;
         return expr_tree();
     }
     return expr_tree(root, parameters_, variable_);
@@ -50,6 +76,8 @@ expr_node* expr_parser::getExpr()
         Link(root, root->left, root->right);
         pos_ = SkipSpaces(str_, pos_);
     }
+    if (errno_ != OK)
+        return root;
 
     while (str_[pos_] == '+' || str_[pos_] == '-') {
         expr_node* new_left = root;
@@ -58,6 +86,8 @@ expr_node* expr_parser::getExpr()
         pos_ = SkipSpaces(str_, pos_ + 1);
         root->right = getProduct();
         Link(root, root->left, root->right);
+        if (errno_ != OK)
+            break;
         pos_ = SkipSpaces(str_, pos_);
     }
     return root;
@@ -163,6 +193,11 @@ expr_node* expr_parser::getWord()
     std::string word;
     while (std::isalnum(str_[pos_]))
         word += str_[pos_++];
+    if (word.size() == 0) {
+        raise(ERR_NO_OPERAND);
+        root = new expr_node(NONE, (long)0);
+        return root;
+    }
     int f_code = findFunction(word);
     if (f_code != NONE) {
         root = new expr_node(OP, (long)f_code);
