@@ -88,6 +88,7 @@ void tex_sentry::transmit(const std::string& text)
 void tex_sentry::end()
 {
     int success = fclose(tex_fo);
+    // If execlp was not sucessful and pdflatex is not runnung, fclose results in broken pipe signal
     if (success < 0)
         state = errno;
     tex_fo = nullptr;

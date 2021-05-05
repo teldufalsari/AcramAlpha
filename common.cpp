@@ -200,10 +200,12 @@ bool NeedParentheses(const expr_node& node)
     if (node.parent == nullptr) {
         return false;
     } else if (node.parent->value.integer == DIV || node.parent->value.integer == SQRT) {
+        // Numerator, denumerator and square root in LaTex output do not require parentheses
         return false;
     } else if (!IsOnLeft(&node) && node.parent->value.integer == PWR) {
         return false;
     }   else if (node.value.integer == PWR && node.parent->value.integer == PWR && IsOnLeft(&node)) {
+        // Power of power always require parentheses
         return true;
     } else if (Priority(*(node.parent)) < Priority(node)) {
         return true;
@@ -281,7 +283,7 @@ bool IsNegative(const expr_node* node)
         return false;
     else if (node->type == INT && node->value.integer < 0)
         return true;
-    else if (
+    else if ( // unary minus + number case
         node->type == OP &&
         node->value.integer == SUB &&
         node->left == nullptr &&

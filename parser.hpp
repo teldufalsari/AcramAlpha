@@ -5,7 +5,10 @@
 #include "common.hpp"
 #include "lib/vector.h"
 #include "expr_tree.hpp"
-/// @file parser.hpp
+/**
+ * @file parser.hpp
+ * @brief expression parser class
+ */
 
 /// Recursive descend parser for function definitions
 class expr_parser

@@ -2,7 +2,10 @@
 #include "parser.hpp"
 #include "texio.hpp"
 #include <stdexcept>
-/// @file main.cpp
+/**
+ * @file main.cpp
+ * @brief functions for main control logic of the program
+ */
 
 /// Return initial text of LaTeX document with randomly chosen splash phrase
 std::string Header()
@@ -64,7 +67,7 @@ void WriteTex(const std::string& code, const fs::path& output_filename)
     std::cout << "Acram: output written successfully to \"" + output_filename.string() + ".tex\"" <<std::endl;
 }
 
-// Check whether user's system has pdflatex executable in default directories
+/// Check whether user's system has pdflatex executable in default directories
 bool LatexExists()
 {
     return fs::exists("/bin/pdflatex") || fs::exists("/usr/bin/pdflatex");

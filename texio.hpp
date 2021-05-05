@@ -7,7 +7,10 @@
 #include <cstdio>
 #include <string>
 #include <iostream>
-/// @file texio.hpp
+/** 
+ * @file texio.hpp
+ * @brief pipe i/o handling class
+ */
 
 /// Sentry object for redirecting LaTeX commands directly to pdflatex
 class tex_sentry
@@ -20,7 +23,7 @@ class tex_sentry
     int state;
 
 public:
-    /// Runs pdflatex with default output file name specified
+    /// Runs pdflatex with default output file name
     tex_sentry();
 
     /**
@@ -32,7 +35,7 @@ public:
 
     /**
      * @brief Write commands to pdflatex standard input
-     * @param text commands
+     * @param text string that contains LaTeX commands
      * @details If state is not OK, transmitting does nothing
      */
     void transmit(const std::string& text);

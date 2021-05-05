@@ -221,7 +221,6 @@ expr_node* expr_parser::getWord()
 
 int expr_parser::findFunction(const std::string& func)
 {
-    // Rewrite using map, please
     if (func == "cos")
         return COS;
     else if (func == "sin")

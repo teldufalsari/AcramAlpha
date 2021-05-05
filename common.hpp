@@ -9,8 +9,12 @@
 #include <chrono>
 namespace fs = std::filesystem;
 
-/// @file common.hpp
+/**
+ * @file common.hpp
+ * @brief Contains miscellanious small classes, non-member functions and definitions.
+ */
 
+/// Error codes that are used by @p expr_parser class and @p main function
 enum error_codes {
     OK = 0,
     ERR_NO_FILE = 1,
@@ -22,10 +26,12 @@ enum error_codes {
     ERR_NO_EQUAL_SIGN
 };
 
+/// Types of expression tree nodes
 enum node_types {
     EMPTY = 0, INT, FRAC, VAR, PAR, OP
 };
 
+/// Numerical codes for operations available in expressions
 enum operations {
     NONE = 0,
     ADD, SUB, MUL, DIV,
@@ -34,6 +40,7 @@ enum operations {
     ASIN, ACOS, ATAN, ACOT
 };
 
+/// @brief Used to store value of an expression node.
 union expr_value
 {
 public:
@@ -47,7 +54,7 @@ public:
 };
 
 /**
- * Node of expression tree.
+ * Node of the expression tree.
  */
 struct expr_node
 {
@@ -58,8 +65,27 @@ struct expr_node
     expr_node* right;
 
 public:
-    expr_node();
+    expr_node() = delete;
+
+    /**
+     * @brief Initialize node with value
+     * @param _type node type ( @p INT, @p OP, etc.)
+     * @param _value node value ( @p 1 , @p SIN, etc.)
+     * @details all pointers are initialized with nullptr
+     */
     expr_node(char _type, const expr_value& _value);
+
+    /**
+     * @brief Initialize node with value and connect it to subtrees
+     * @param _type node type ( @p INT, @p OP, etc.)
+     * @param _value node value ( @p 1 , @p SIN, etc.)
+     * @param parent value to initialize @p parent field
+     * @param left value to initialize @p left field
+     * @param right value to initialize @p right field
+     * @details Note that values of parent, left and right nodes are unchanged.
+     * Caller should call @p Link function to connect nodes altogether
+     * or do it manually.
+     */
     expr_node(
         char _type,
         const expr_value& _value,
@@ -67,11 +93,20 @@ public:
         expr_node* left,
         expr_node* right
         );
+
+    /**
+     * @brief Recursive destructor
+     * @details Deletes left and right subtrees unless they are @p nullptr.
+     * This way the caller sohuld delete only root to recursively free all memory.
+     */
     ~expr_node();
 
     /**
-     * Connect node with left and right subtrees
-     * Works correctly if any of the pointers is nullptr
+     * Connect node with left and right subtrees.
+     * Works correctly if any of the pointers is @p nullptr
+     * @param _parent pointer to node
+     * @param _left pointer to the node that becomes the left subtree
+     * @param _right pointer to the node that becomes the right subtree
      */
     friend void Link(expr_node* _parent, expr_node* _left, expr_node* _right);
 };
@@ -82,13 +117,17 @@ public:
  */
 expr_node* Copy(const expr_node* src);
 
-/// Generate a filesystem path vector from command line argument vector
+/**
+ * @brief Generate a @p std::filesystem::path vector from command line argument vector
+ * @param names_count number of strings to read from @p names
+ * @param names argument array starting from the first name to convert
+ */
 tld::vector<fs::path> FillPathv(int names_count, char* names[]);
 
 /**
  * @brief Extract a substring up to a delimeter
- * @param where_from
- * @param where_to
+ * @param where_from string to extract from
+ * @param where_to string where to place the result
  * @param pos initial position of extraction
  * @param delim delimeter character
  * @return Position in the string where the firs delimeter was met
@@ -98,8 +137,8 @@ size_t Extract(const std::string& where_from, std::string& where_to, size_t pos,
 
 /**
  * @brief Extract a substring up to a delimeter
- * @param where_from
- * @param where_to
+ * @param where_from string to extract from
+ * @param where_to string where to place the result
  * @param pos initial position of extraction
  * @param delim C-string that represents the delimeter set
  * @return Position in the string where the firs delimeter was met
@@ -154,6 +193,13 @@ bool IsNegative(const expr_node* node);
 /// Get randomly chosen phrase
 std::string Splash();
 
+/** 
+ * Find next non-space character in string
+ * @param str string to search
+ * @param pos position to search from
+ * @return Position of first occurence of any non-space
+ * character since @p pos
+ */
 inline std::size_t SkipSpaces(const std::string& str, size_t pos)
 {
     while (std::isspace(str[pos]))
@@ -161,6 +207,7 @@ inline std::size_t SkipSpaces(const std::string& str, size_t pos)
     return pos;
 }
 
+/// Find element in a vector
 template <typename T>
 inline size_t VecFind(const tld::vector<T>& the_vector, const T& value)
 {

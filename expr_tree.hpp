@@ -2,7 +2,10 @@
 #define ACRAM_EXPR_TREE_H
 
 #include "common.hpp"
-/// @file expr_tree.hpp
+/**
+ * @file expr_tree.hpp
+ * @brief expression tree class
+ */
 
 enum semantic_errors {
     T_OK,
@@ -27,8 +30,19 @@ class expr_tree
     int errno_;
 
 public:
+    /**
+     * @brief Default constructor
+     * @details Used when an empty tree is required as a null value
+     */
     expr_tree() = default;
+
+    /**
+     * @brief Construct normal expression tree
+     * @details This is the constructor that is normally used by other functions
+     */
     expr_tree(expr_node* _root, const tld::vector<std::string>& _parameters, const std::string& _variable, const std::string& _name);
+    
+    /// Recursively frees allocated memory
     ~expr_tree();
 
     /// Get representation of the expression in LaTeX commands
@@ -62,9 +76,12 @@ public:
     int status();
 
 private:
-    std::string toStr(const expr_node* node);
+    
+    // Get LaTeX representation of a node
     std::string toTex(const expr_node* node);
-    std::string valueToStr(const expr_node& node);
+
+    // Get LaTeX representation of node's value
+    // toTex method traverses the tree applying this method to nodes
     std::string texify(const expr_node& node);
 
     // Recursively calculates derivative of node
@@ -91,6 +108,7 @@ private:
     void simplify(expr_node* node);
 
     // The following methods define rules of simplification //
+    
     void mulSimplifs(expr_node* node);
     void divSimplifs(expr_node* node);
     void addSimplifs(expr_node* node);
