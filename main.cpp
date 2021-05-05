@@ -2,7 +2,9 @@
 #include "parser.hpp"
 #include "texio.hpp"
 #include <stdexcept>
+/// @file main.cpp
 
+/// Return initial text of LaTeX document with randomly chosen splash phrase
 std::string Header()
 {
     return
@@ -18,6 +20,12 @@ std::string Header()
     "\\end{center}\n";
 }
 
+/**
+ * @brief Parse string with a function and append it and it's derivative in LaTeX format to another string
+ * @param func_str string to parse
+ * @param output_ss where to append data
+ * @return Zero on success or non-zero error code
+ */
 int ProcessFunction(const std::string& func_str, std::string& output_ss)
 {
     expr_parser parser(func_str);
@@ -38,6 +46,11 @@ int ProcessFunction(const std::string& func_str, std::string& output_ss)
     return OK;
 }
 
+/**
+ * @brief Create .tex output file from a string
+ * @param code string containing LaTeX source code
+ * @param output_filename name of file to be created (without an extension)
+ */
 void WriteTex(const std::string& code, const fs::path& output_filename)
 {
     std::cout << "Acram: LaTeX executable not found" << std::endl;
@@ -51,11 +64,19 @@ void WriteTex(const std::string& code, const fs::path& output_filename)
     std::cout << "Acram: output written successfully to \"" + output_filename.string() + ".tex\"" <<std::endl;
 }
 
+// Check whether user's system has pdflatex executable in default directories
 bool LatexExists()
 {
     return fs::exists("/bin/pdflatex") || fs::exists("/usr/bin/pdflatex");
 }
 
+/**
+ * Create .pdf output file from a source code string
+ * @param code string containing LaTeX source code
+ * @param output_filename name of file to be created (without an extension)
+ * @details output_filename.log and output_filename.aux files are created as
+ * on usual pdflatex run
+ */
 void LatexToPdf(const std::string& code, const fs::path& output_filename)
 {
     std::cout << "Acram: Converting output to pdf..." << std::endl;
@@ -71,6 +92,11 @@ void LatexToPdf(const std::string& code, const fs::path& output_filename)
     std::cout << "Acram: output written successfully to \"" + output_filename.string() + ".pdf\"" << std::endl;
 }
 
+/**
+ * @brief Ask user to continue or to leave application
+ * @return true if 'y' was entered, false if 'n'
+ * @details Blocks program until user writes correct input
+ */
 bool Ask()
 {
     bool proceed = true;
@@ -87,17 +113,22 @@ bool Ask()
             proceed = false;
             break;
         }
-        std::cout << "Acram: again: print Y to start or Q to exit:\n]=> ";
+        std::cout << "Acram: again: print Y to enter or Q to exit:\n]=> ";
     }
     return proceed;
 }
 
+/**
+ * @brief Run Acram Alpha in console input mode
+ * @param output_filename derived from second command line argument
+ * @return process exit code
+ */
 int ConsoleMode(const fs::path& output_filename)
 {
     std::string input_buf, output(Header());
     std::cout << "Acram Alpha, symbolic differentiator by @teldufalsari" << std::endl;
     while (1) {
-        std::cout << "Acram: print Y to start or Q to exit:\n]=> ";
+        std::cout << "Acram: print Y to enter or Q to exit:\n]=> ";
         bool proceed = Ask();
         if (proceed == false) {
             output += "\\end{document}\n";
@@ -112,12 +143,18 @@ int ConsoleMode(const fs::path& output_filename)
             }
             return 0;
         }
-        std::cout << "Acram: write your function in the format \"f(x)=...\"\n]=> ";
+        std::cout << "Acram: enter your function in the format \"f(x)=...\"\n]=> ";
         std::getline(std::cin, input_buf, '\n');
         ProcessFunction(input_buf, output);
     }
 }
 
+/**
+ * @brief Run Acram Alpha in file input mode
+ * @param inputs input file names
+ * @param output_filename derived from the last line argument
+ * @return process exit code
+ */
 int FileMode(const tld::vector<fs::path>& inputs, const fs::path& output_filename)
 {
     std::string input_buf, output(Header());

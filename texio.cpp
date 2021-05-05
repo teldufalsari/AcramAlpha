@@ -13,13 +13,13 @@ tex_sentry::tex_sentry() : tex_pid(0), tex_fo(nullptr), state(0)
         return;
     } else if (tex_pid == 0) { // Child section
         close(pipefd[1]);
-        int musorka = open("/dev/null", O_WRONLY);
-        int tex_outputfd = dup2(musorka, STDOUT_FILENO);
+        int trash_fd = open("/dev/null", O_WRONLY);
+        int tex_outputfd = dup2(trash_fd, STDOUT_FILENO);
         if (tex_outputfd < 0) {
-            close(musorka);
+            close(trash_fd);
             exit(1);
         }
-        close(musorka);
+        close(trash_fd);
         int tex_inputfd = dup2(pipefd[0], STDIN_FILENO);
         if (tex_inputfd < 0) {
             close(pipefd[0]);
@@ -43,18 +43,18 @@ tex_sentry::tex_sentry(const std::string& out_file_name) : tex_pid(0), tex_fo(nu
         return;
     }
     tex_pid = fork();
-    if (tex_pid < 0) {
+    if (tex_pid < 0) { // Fork was not sucessful
         state = errno;
         return;
-    } else if (tex_pid == 0) {
+    } else if (tex_pid == 0) { // Child section
         close(pipefd[1]);
-        int musorka = open("/dev/null", O_WRONLY);
-        int tex_outputfd = dup2(musorka, STDOUT_FILENO);
+        int trash_fd = open("/dev/null", O_WRONLY);
+        int tex_outputfd = dup2(trash_fd, STDOUT_FILENO);
         if (tex_outputfd < 0) {
-            close(musorka);
+            close(trash_fd);
             exit(1);
         }
-        close(musorka);
+        close(trash_fd);
         int tex_inputfd = dup2(pipefd[0], STDIN_FILENO);
         if (tex_inputfd < 0) {
             close(pipefd[0]);
@@ -63,7 +63,7 @@ tex_sentry::tex_sentry(const std::string& out_file_name) : tex_pid(0), tex_fo(nu
         close(pipefd[0]);
         execlp("pdflatex", "pdflatex", "-jobname", out_file_name.c_str(), nullptr);
         exit(1);
-    }
+    } // End of child section
     close(pipefd[0]);
     tex_fo = fdopen(pipefd[1], "w");
     if (tex_fo == nullptr)
@@ -78,7 +78,8 @@ tex_sentry::~tex_sentry()
 
 void tex_sentry::transmit(const std::string& text)
 {
-    clearerr(tex_fo);
+    if (state != 0)
+        return;
     std::size_t written = fwrite(text.data(), sizeof(char), text.size(), tex_fo);
     if (written < text.size())
         state = ferror(tex_fo);
