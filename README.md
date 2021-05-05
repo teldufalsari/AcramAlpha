@@ -1,5 +1,5 @@
 # Acram Alpha
-Symbolic differentiator for Linux.
+Symbolic differentiator for GNU/Linux.
 
 ## What is it?
 This is a symbolic differentiator: software that takes
@@ -9,7 +9,7 @@ If not, LaTeX source file will be created instead.
 
 ## Usage
 Acram Alpha can operate in two input modes: console and file
-### Console mode
+### Console mode:
 Print `acram` to enter console input mode. Follow the instructions:
 if there are any syntax or semantic error, they will be reported and
 input will be discarded. On exit, all functions entered will be outputted
@@ -19,7 +19,7 @@ to `pdflatex` or saved as LaTeX source. The file name will be either
 Print `acram [filename]` to specify output file name instead
 of "Acram_out.*"
 
-### File mode
+### File mode:
 Print `acram  file_1 [file_2 ...] output_file` to run Acram Alpha
 in file input mode. Each file should contain mathematical function
 on a single line. If there are any errors, they will be reported and
@@ -34,7 +34,7 @@ of "output_file.tex" respectively.
  * natural logarithm and exponential function
  * square root as a distinct from power func`tion
 
-### Errors:
+### Bugs and issues:
  * functions like f(x)^(g(x)) are not supported though treated as if g(x) is constant
  * calculatons with decimal fraction are not supported. You'd better not use them at all
  * if `pdflatex` is installed but for some reason would not start, the program silently fails
