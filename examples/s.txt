@@ -1,0 +1,1 @@
+s(t) = c1*cos(w0*t + f1) + c2*sin(w0*t + f2)
