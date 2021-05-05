@@ -1,6 +1,7 @@
 #include "common.hpp"
 #include "parser.hpp"
 #include "texio.hpp"
+#include <stdexcept>
 
 std::string Header()
 {
@@ -16,38 +17,57 @@ std::string Header()
     "\\end{center}\n";
 }
 
-int ProcessFile(std::ifstream& input_fs, std::uintmax_t input_size, tex_sentry& output_pipe)
+int ProcessFunction(const std::string& func_str, std::string& output_ss)
 {
-    std::string input(input_size, '\0');
-    getline(input_fs, input);
-    expr_parser parser(input);
+    expr_parser parser(func_str);
     expr_tree function = parser.read();
     if (parser.status() != OK) {
         std::cout << "Acram: " << parser.strerror() << std::endl;
         return parser.status();
     }
-    else {
-        function.checkSemantics();
-        if (function.status() != T_OK) {
-            std::cout << "Acram: " << function.strerror() << std::endl;
-            return function.status();
-        }
-        auto deriv = function.derivative();
-        deriv.simplify();
-        output_pipe.transmit("\\begin{dmath*}\n" + function.getName() + '(' + function.getVar() + ")=" + function.toTex() + "\\end{dmath*}\n");
-        output_pipe.transmit("\\begin{dmath*}\n" + deriv.getName() + '(' + deriv.getVar() + ")=" + deriv.toTex() + "\\end{dmath*}\n");
-        return OK;
+    function.checkSemantics();
+    if (function.status() != OK) {
+        std::cout << "Acram: " << function.strerror() << std::endl;
+        return function.status();
     }
+    auto derivative = function.derivative();
+    derivative.simplify();
+    output_ss += "\\begin{dmath*}\n" + function.getName() + '(' + function.getVar() + ")=" + function.toTex() + "\\end{dmath*}\n";
+    output_ss += "\\begin{dmath*}\n" + derivative.getName() + '(' + derivative.getVar() + ")=" + derivative.toTex() + "\\end{dmath*}\n";
+    return OK;
 }
 
-tex_sentry TexInit(const fs::path& output_filename)
+void WriteTex(const std::string& code, const fs::path& output_filename)
 {
+    std::cout << "Acram: LaTeX executable not found" << std::endl;
+    std::ofstream output_fs(output_filename);
+    if (!output_fs.is_open())
+        throw std::runtime_error("Acram: couldn't open file \"" + output_filename.string() + "\" to write TeX output");
+    std::cout << "Acram: writing TeX output to \"" + output_filename.string() + "\"..." << std::endl;
+    output_fs.write(code.c_str(), code.size());
+    if (!output_fs.good())
+        throw std::runtime_error("Acram: errors occured during writing. Data may be incomplete");
+    std::cout << "Acram: output written successfully to \"" + output_filename.string() + ".tex\"" <<std::endl;
+}
+
+bool LatexExists()
+{
+    return fs::exists("/bin/pdflatex") || fs::exists("/usr/bin/pdflatex");
+}
+
+void LatexToPdf(const std::string& code, const fs::path& output_filename)
+{
+    std::cout << "Acram: Converting output to pdf..." << std::endl;
     tex_sentry tex(output_filename);
     if (tex.getState())
-        std::cout << "Acram: couln't run LaTeX executable" << std::endl;
-    else
-        tex.transmit(Header());
-    return tex;
+        throw std::runtime_error("Acram: couldn't run LaTeX executable");
+    tex.transmit(code);
+    if (tex.getState())
+        throw std::runtime_error("Acram: failed to transmit data to LaTeX executable");
+    tex.end();
+    if (tex.getState())
+        throw std::runtime_error("Acram: LaTeX exited with bad status");
+    std::cout << "Acram: output written successfully to \"" + output_filename.string() + ".pdf\"" << std::endl;
 }
 
 bool Ask()
@@ -66,47 +86,62 @@ bool Ask()
             proceed = false;
             break;
         }
-        std::cout << "Acram: again: print Y to start or Q to exit:";
+        std::cout << "Acram: again: print Y to start or Q to exit:\n]=> ";
     }
     return proceed;
 }
 
 int ConsoleMode(const fs::path& output_filename)
 {
-    tex_sentry tex = TexInit(output_filename);
-    std::string input;
-    if (tex.getState()) {
-        std::cout << "Acram: failed to transmit data to LaTeX executable" << std::endl;
-        return tex.getState();
-    }
+    std::string input_buf, output(Header());
+    std::cout << "Acram Alpha, symbolic differentiator by @teldufalsari" << std::endl;
     while (1) {
-        std::cout << "Acram Alpha, v2.721\n" "Acram: print Y to start or Q to exit:";
+        std::cout << "Acram: print Y to start or Q to exit:\n]=> ";
         bool proceed = Ask();
         if (proceed == false) {
-            tex.transmit("\\end{document}\n");
-            tex.end();
+            output += "\\end{document}\n";
+            try {
+                if (LatexExists())
+                    LatexToPdf(output, output_filename);
+                else
+                    WriteTex(output, output_filename);
+            } catch (std::runtime_error& ex) {
+                std::cout << ex.what() << std::endl;;
+                return 1;
+            }
             return 0;
         }
-        std::cout << "Acram: write your function in the format \"f(x)=...\"\n";
-        std::getline(std::cin, input, '\n');
-        expr_parser parser(input);
-        expr_tree function = parser.read();
-        if (parser.status() != OK) {
-            std::cout << "Acram: " << parser.strerror() << std::endl;
+        std::cout << "Acram: write your function in the format \"f(x)=...\"\n]=> ";
+        std::getline(std::cin, input_buf, '\n');
+        ProcessFunction(input_buf, output);
+    }
+}
+
+int FileMode(const tld::vector<fs::path>& inputs, const fs::path& output_filename)
+{
+    std::string input_buf, output(Header());
+    std::cout << "Acram Alpha, symbolic differentiator by @teldufalsari" << std::endl;
+    for (std::size_t i = 0; i < inputs.size(); i++) {
+        std::ifstream input_fs(inputs[i]);
+        if (!input_fs.is_open()) {
+            std::cout << "Acram: can't open file " << inputs[i] << std::endl;
             continue;
         }
-        else {
-            function.checkSemantics();
-            if (function.status() != T_OK) {
-                std::cout << "Acram: " << function.strerror() << std::endl;
-                continue;
-            }
-        }
-        auto deriv = function.derivative();
-        deriv.simplify();
-        tex.transmit("\\begin{dmath*}\n" + function.getName() + '(' + function.getVar() + ")=" + function.toTex() + "\\end{dmath*}\n");
-        tex.transmit("\\begin{dmath*}\n" + deriv.getName() + '(' + deriv.getVar() + ")=" + deriv.toTex() + "\\end{dmath*}\n");
+        std::cout << "Acram: processing file " << inputs[i] << std::endl;
+        std::getline(input_fs, input_buf);
+        ProcessFunction(input_buf,output);
     }
+    output += "\\end{document}\n";
+    try {
+        if (LatexExists())
+            LatexToPdf(output, output_filename);
+        else
+            WriteTex(output, output_filename.string() + ".tex");
+    } catch (std::runtime_error& ex) {
+        std::cout << ex.what() << std::endl;;
+        return 1;
+    }
+    return 0;
 }
 
 int main(int argc, char* argv[])
@@ -121,28 +156,6 @@ int main(int argc, char* argv[])
         std::cout << "Acram: no real files were provided, leaving" << std::endl;
         return ERR_NO_FILE;
     }
-
-    tex_sentry tex = TexInit(argv[argc - 1]);
-    if (tex.getState()) {
-        std::cout << "Acram: failed to transmit data to LaTeX executable" << std::endl;
-        return tex.getState();
-    }
-    tex.transmit(Header());
-    for (std::size_t C = 0; C < pathv.size(); C++) { // isn't it beautiful?
-        std::ifstream input_fs(pathv[C]);
-        if (!input_fs.is_open()) {
-            std::cout << "Acram: can't open file " << pathv[C] << std::endl;
-            continue;
-        }
-        std::cout << "Acram: processing file " << pathv[C] << std::endl;
-        if (ProcessFile(input_fs, fs::file_size(pathv[C]), tex))
-            std::cout << "Couldn't create pdf for file " << pathv[C] << std::endl;
-    }
-    tex.transmit("\\end{document}");
-    tex.end();
-    if (tex.getState()) {
-        std::cout << "TeX error" << std::endl;
-        return tex.getState();
-    }
-    return 0;
+    fs::path output_filename(argv[argc - 1]);
+    return FileMode(pathv, output_filename);
 }

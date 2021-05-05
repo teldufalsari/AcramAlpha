@@ -6,13 +6,13 @@
 #include <sys/wait.h>
 #include <cstdio>
 #include <string>
+#include <iostream>
 
 class tex_sentry
 {
     pid_t tex_pid;
     FILE* tex_fo;
     int state;
-    int stage;
 
 public:
     tex_sentry();
