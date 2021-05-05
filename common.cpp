@@ -176,14 +176,6 @@ int Priority(const expr_node& node)
 {
     if (node.type == OP) {
     switch (node.value.integer) {
-        case COS:
-        case SIN:
-        case TAN:
-        case COT:
-        case EXP:
-        case LOG:
-            return 3;
-        
         case PWR:
             return 2;
         
@@ -196,7 +188,7 @@ int Priority(const expr_node& node)
             return 5;
         
         default:
-            return -1;
+            return 3;
         }
     } else {
         return 1;
