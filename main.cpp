@@ -6,11 +6,12 @@
 std::string Header()
 {
     return
-    "\\documentclass{article}\n"
+    "\\documentclass[12pt]{article}\n"
     "\\usepackage[russian]{babel}\n"
     "\\usepackage{amsmath}\n"
     "\\usepackage{breqn}\n"
     "\\DeclareMathOperator{\\arccot}{arccot}\n"
+    "\\pagestyle{empty}\n"
     "\\begin{document}\n"
     "\\begin{center}\n"
     "{\\Large " + Splash() + "}\n"
