@@ -46,6 +46,7 @@ int ProcessFunction(const std::string& func_str, std::string& output_ss)
     derivative.simplify();
     output_ss += "\\begin{dmath*}\n" + function.getName() + '(' + function.getVar() + ")=" + function.toTex() + "\\end{dmath*}\n";
     output_ss += "\\begin{dmath*}\n" + derivative.getName() + '(' + derivative.getVar() + ")=" + derivative.toTex() + "\\end{dmath*}\n";
+    std::cout << "Acram: function differentiated sucessfully" << std::endl;
     return OK;
 }
 
@@ -116,7 +117,7 @@ bool Ask()
             proceed = false;
             break;
         }
-        std::cout << "Acram: again: print Y to enter or Q to exit:\n]=> ";
+        std::cout << "Acram: again: print Y to continue or Q to exit:\n]=> ";
     }
     return proceed;
 }
@@ -131,7 +132,7 @@ int ConsoleMode(const fs::path& output_filename)
     std::string input_buf, output(Header());
     std::cout << "Acram Alpha, symbolic differentiator by @teldufalsari" << std::endl;
     while (1) {
-        std::cout << "Acram: print Y to enter or Q to exit:\n]=> ";
+        std::cout << "Acram: print Y to continue or Q to exit:\n]=> ";
         bool proceed = Ask();
         if (proceed == false) {
             output += "\\end{document}\n";
