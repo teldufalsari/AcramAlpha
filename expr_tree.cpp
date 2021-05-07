@@ -122,7 +122,7 @@ expr_node* expr_tree::derivative(const expr_node* node)
             break;
         case SUB:
             deriv = new expr_node(OP, (long)SUB);
-            if (node->left != nullptr)
+            if (node->left != nullptr) // bc minus can be unary
                 deriv->left = derivative(node->left);
             else
                 deriv->left = nullptr;

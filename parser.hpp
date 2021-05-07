@@ -45,7 +45,7 @@ public:
     /// Obtain parsing status
     int status() const;
 
-    /// Get string describing a parser error (if status is non-zero)
+    /// Get string describing a parsing error (if status is non-zero)
     std::string strerror() const;
 
 private:

@@ -94,6 +94,11 @@ public:
         expr_node* right
         );
 
+    expr_node(const expr_node& that) = delete;
+    expr_node(expr_node&& that) = delete;
+    expr_node& operator =(const expr_node& that) = delete;
+    expr_node& operator =(expr_node&& that) = delete;
+    
     /**
      * @brief Recursive destructor
      * @details Deletes left and right subtrees unless they are @p nullptr.

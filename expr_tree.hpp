@@ -42,6 +42,11 @@ public:
      */
     expr_tree(expr_node* _root, const tld::vector<std::string>& _parameters, const std::string& _variable, const std::string& _name);
     
+    expr_tree(const expr_tree& that) = delete;
+    expr_tree(const expr_tree&& that) = delete;
+    expr_tree& operator =(const expr_tree& that) = delete;
+    expr_tree& operator =(expr_tree&& that) = delete;
+
     /// Recursively frees allocated memory
     ~expr_tree();
 
