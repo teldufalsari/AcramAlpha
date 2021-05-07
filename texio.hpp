@@ -23,14 +23,20 @@ class tex_sentry
     int state;
 
 public:
-    /// Runs pdflatex with default output file name
-    tex_sentry();
+    tex_sentry() = delete;
 
     /**
      * @brief Runs pdflatex with specified output file name
      * @param out_file_name file name without an extension
      */
     tex_sentry(const std::string& out_file_name);
+
+    tex_sentry(const tex_sentry& that) = delete;
+    tex_sentry(tex_sentry&& that) = delete;
+    tex_sentry& operator =(const tex_sentry& that) = delete;
+    tex_sentry& operator =(tex_sentry&& that) = delete;
+
+    /// Closes stream associated with pipe if hasn't been closed yet
     ~tex_sentry();
 
     /**
