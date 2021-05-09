@@ -228,7 +228,7 @@ void vector<T>::reserve(std::size_t new_capacity)
         return;
     T* temp_buf = new T[new_capacity];
     for (std::size_t i = 0; i < size_; i++)
-        temp_buf[i] = m_data_[i];
+        temp_buf[i] = std::move(m_data_[i]);
     delete[] m_data_;
     m_data_ = temp_buf;
     capacity_ = new_capacity;
